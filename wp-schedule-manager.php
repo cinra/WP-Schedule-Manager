@@ -9,7 +9,7 @@ Author URI: http://www.cinra.co.jp/
 License: not-yet
 */
 
-include('./core.php');
+include(dirname(__FILE__).'/core.php');
 
 class wp_schedule_manager {
 	
@@ -34,6 +34,13 @@ class wp_schedule_manager {
 	function __construct() {
 		//exit(dirname(__FILE__));
 	}
+}
+
+add_action('admin_menu', 'wpsm_add_sidemenu');
+function wpsm_add_sidemenu() {
+	
+	add_menu_page('schedule', 'schedule', 7, 'admin.php');
+	
 }
 
 
