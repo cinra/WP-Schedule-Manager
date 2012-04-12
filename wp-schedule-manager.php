@@ -11,10 +11,36 @@ License: not-yet
 
 class wp_schedule_manager {
 	
-	function __construct() {
-		exit('UUU');
+	public function get($usr_opt = array()) {
+		$opt = array(
+			'date'		=> 'Today'
+		);
+		$opt = array_merge($opt, $usr_opt);
+		
+		
+		// Test
+		if (!is_admin()) {
+			print_r($opt);
+			
+			echo '<br />'.strtotime($opt['date']);
+			echo '<br />'.time();
+			
+			exit;
+		}
 	}
 	
+	function __construct() {
+		//exit(dirname(__FILE__));
+	}
+}
+
+function wpsm_init_adminmenu() {
+	add_meta_box('schedule_manager', __('schedule'), 'wpsm_output_metabox', 'post', 'normal');
+}
+add_action('admin_menu', 'wpsm_init_adminmenu');
+
+function wpsm_output_metabox() {
+	echo '<div>テストです</div>';
 }
 
 if(defined('WP_PLUGIN_URL')) {
