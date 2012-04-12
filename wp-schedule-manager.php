@@ -39,10 +39,16 @@ class wp_schedule_manager {
 add_action('admin_menu', 'wpsm_add_sidemenu');
 function wpsm_add_sidemenu() {
 	
-	add_menu_page('schedule', 'schedule', 7, 'admin.php');
+	add_menu_page('schedule', 'schedule', 7, __FILE__, 'toppage');
 	
 }
 
+function toppage() {
+	echo '<div class="wrap">';
+	echo '<div id="icon-options-general" class="icon32"><br></div>';
+	echo "<h2>スケジュール</h2>";
+	echo '</div>';
+}
 
 
 if(defined('WP_PLUGIN_URL')) {
