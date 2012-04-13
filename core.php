@@ -49,7 +49,7 @@ a.wpsm_plus:hover {
 			
 			
 			
-			//初期化処理
+			//
 			wpsmaf=wpsm;
 			wpsm="wpsm_daybox";
 						
