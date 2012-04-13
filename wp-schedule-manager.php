@@ -31,31 +31,68 @@ class wp_schedule_manager {
 		}
 	}
 	
+	public function set($usr_opt = array()) {
+		
+		$opt = array(
+			'post_id'	=> get_the_ID()
+		);
+		if (is_array($usr_opt)) $opt = array_merge($opt, $usr_opt);
+		
+		echo 'POSTID: '.$opt['post_id'];
+		#print_r($_POST);
+		
+		//add_post_custom();
+		
+		exit();
+		
+	}
+	
 	function __construct() {
 		//exit(dirname(__FILE__));
 	}
 }
 
+add_action('save_post', array(&$wpsm, 'set'), 10);
+
 add_action('admin_menu', 'wpsm_add_sidemenu');
 function wpsm_add_sidemenu() {
-	
-	add_menu_page('schedule', 'schedule', 7, 'wpsm', 'toppage');
- 	add_submenu_page('wpsm', 'schedule', 7, 'wpsm', 'toppage');
-	
+	add_menu_page('schedule', 'schedule', 7, 'wpsm', 'admin_schedule_list');
+ 	add_submenu_page('wpsm', 'schedule', 7, 'wpsm', 'admin_schedule_list');
 }
 
-function toppage() {
+function admin_schedule_list() {
 	echo '<div class="wrap">';
 	echo '<div id="icon-options-general" class="icon32"><br></div>';
 	echo "<h2>スケジュール</h2>";
 	echo <<<EOF
 <div class="subsubsub"></div>
 
-<table class="widefat">
+<table class="widefat" style="margin-bottom: 1em;">
 	<tr>
 		<td>UUUUUU</td>
 	</tr>
 </table>
+
+<form>
+<table class="widefat">
+	<thead>
+		<tr>
+			<th scope="col" colspan="2">テスト</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="mainraw">
+			<td>テスト</td>
+			<td>テスト</td>
+		</tr>
+		<tr class="mainraw">
+			<td>テスト</td>
+			<td>テスト</td>
+		</tr>
+	</tbody>
+</table>
+</form>
+
 EOF;
 	echo '</div>';
 }
