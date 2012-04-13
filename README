@@ -1,0 +1,4 @@
+<h1>WP-Schedule-Manager</h1>
+Usage
+
+$wpsm->get()
