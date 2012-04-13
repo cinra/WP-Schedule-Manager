@@ -78,7 +78,7 @@ add_action('save_post', array(&$wpsm, 'set'), 10);
 add_action('admin_menu', 'wpsm_add_sidemenu');
 function wpsm_add_sidemenu() {
 	add_menu_page('schedule', 'schedule', 7, 'wpsm', 'admin_schedule_list');
- 	add_submenu_page('wpsm', 'schedule', 7, 'wpsm', 'admin_schedule_list');
+ 	add_submenu_page('wpsm', 'schedule','編集', 7, 'edit', 'admin_schedule_list');
 }
 
 function admin_schedule_list() {
