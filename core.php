@@ -17,6 +17,13 @@ a.wpsm_plus {
 a.wpsm_plus:hover {
 	cursor:pointer;
 }
+a.wpsm_maenas {
+	background:#333;
+	display:none;
+}
+a.wpsm_maenas:hover {
+	cursor:pointer;
+}
 </style>
 
 <script type="text/javascript">
@@ -25,11 +32,13 @@ a.wpsm_plus:hover {
 
 	$(function() {
 	 var count=0;
+	 var alcount=0;
 	 var wpsm="wpsm_daybox";
 	 var wpsmaf="wpsm_daybox0";
 		$('.wpsm_plus').live('click', function() {
 			var html =$('.wpsm_daybox0').html();
 			count++;
+			alcount++;
 			wpsm=wpsm+count;
 			//console.log(html);
 			var wpsmadd="<div class=" + wpsm + "></div>";
@@ -41,11 +50,11 @@ a.wpsm_plus:hover {
 			wpsm_time="wpsm_time[" + count + "]";
 			wpsm_yoyaku="wpsm_yoyaku[" + count + "]";
 			wpsm_URL="wpsm_URL[" + count + "]";
-			$("."+wpsm).children(".day").children("input").attr("name",wpsm_day)
-			$("."+wpsm).children(".time").children("input").attr("name",wpsm_time)
-			$("."+wpsm).children(".yoyaku").children("input").attr("name",wpsm_yoyaku)
-			$("."+wpsm).children(".URL").children("input").attr("name",wpsm_URL)
-			
+			$("."+wpsm).children(".day").children("input").attr("name",wpsm_day);
+			$("."+wpsm).children(".time").children("input").attr("name",wpsm_time);
+			$("."+wpsm).children(".yoyaku").children("input").attr("name",wpsm_yoyaku);
+			$("."+wpsm).children(".URL").children("input").attr("name",wpsm_URL);
+			$(".wpsm_maenas").css("display","inline");
 			
 			
 			
@@ -54,6 +63,23 @@ a.wpsm_plus:hover {
 			wpsm="wpsm_daybox";
 						
 
+		});
+		$('.wpsm_maenas').live('click', function() {
+			console.log($(this).parent().parent());
+			$(this).parent().parent().css("display","none");
+			$(this).parent().parent().children(".day").children("input").attr("value","delete");
+			$(this).parent().parent().children(".time").children("input").attr("value","delete");
+			$(this).parent().parent().children(".yoyaku").children("input").attr("value","0");
+			$(this).parent().parent().children(".URL").children("input").attr("value","delete");
+						
+			alcount--;
+			console.log(alcount);
+			
+			if(1>alcount){
+				$(".wpsm_maenas").css("display","none");
+			}
+			
+			
 		});
 	});
 })(jQuery);
@@ -76,6 +102,7 @@ a.wpsm_plus:hover {
 	<label >URL</label>
 	<input type="text" name="wpsm_url[0]" size="100" tabindex="1" value="" id="sc-URL" autocomplete="off">
 	<p><a class="wpsm_plus">+</a></p>
+	<p><a class="wpsm_maenas">-</a></p>
 </div>
 
 
