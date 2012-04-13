@@ -31,17 +31,33 @@ class wp_schedule_manager {
 		}
 	}
 	
+	public function set($usr_opt = array()) {
+		
+		$opt = array(
+			'post_id'	=> get_the_ID()
+		);
+		if (is_array($usr_opt)) $opt = array_merge($opt, $usr_opt);
+		
+		echo 'POSTID: '.$opt['post_id'];
+		#print_r($_POST);
+		
+		//add_post_custom();
+		
+		exit();
+		
+	}
+	
 	function __construct() {
 		//exit(dirname(__FILE__));
 	}
 }
 
+add_action('save_post', array(&$wpsm, 'set'), 10);
+
 add_action('admin_menu', 'wpsm_add_sidemenu');
 function wpsm_add_sidemenu() {
-	
 	add_menu_page('schedule', 'schedule', 7, 'wpsm', 'admin_schedule_list');
  	add_submenu_page('wpsm', 'schedule', 7, 'wpsm', 'admin_schedule_list');
-	
 }
 
 function admin_schedule_list() {
