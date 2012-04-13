@@ -24,8 +24,28 @@ class wp_schedule_manager {
 		$sql = "SELECT * FROM ".WPSM_DB_TABLENAME;
 		$where = array();
 		
+		// 投稿記事
 		if ($opt['post_id']) $where[] = "`post_id` = '".$opt['post_id']."'";
 		
+		// カテゴリフィルター
+		if ($opt['category']) {
+			$cat = explode(',', $opt['category']);
+			if (!empty($cat)) {
+				$catstr = "";
+				foreach($cat as $c) {
+					if (!is_integer($c)) {
+						$tmpobj = get_term_by('slug', $c, 'category');
+						$c = $tmpobj->ID;
+					}
+					$catarr[] = $c;
+				}
+				$catstr = implode(' OR ', $catarr);
+			}
+			
+			print_r($cat);exit;
+		}
+		
+		// 日付（開始日時と終了日時）
 		if ($opt['date']) {
 			$opt['date'] = strtotime($opt['date']);
 			$opt['date'] = date('Y-m-d', $opt['date']);
@@ -36,13 +56,12 @@ class wp_schedule_manager {
 			if ($opt['term_by'] == 'day')	$date_end[2] = (int)$date_end[2] + $opt['term'];
 			if ($opt['term_by'] == 'week')	$date_end[2] = (int)$date_end[2] + ($opt['term']*7);
 			
-			#print_r($date_end);
-			
 			$end_str = date('Y-m-d', mktime(0, 0, 0, $date_end[1], $date_end[2], $date_end[0]));
 			
 			$where[] = "(`date` >= '".$opt['date']."' AND `date` < '".$end_str."')";
 		}
 		
+		// SQL作成
 		if (!empty($where)) $sql .= " WHERE ".implode(' AND ', $where);
 		
 		$sql .= " ORDER BY `".$opt['order_by']."` ".$opt['order'];
