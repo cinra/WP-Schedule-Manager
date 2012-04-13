@@ -90,17 +90,58 @@ EOF;
 <table class="widefat">
 	<thead>
 		<tr>
-			<th scope="col" colspan="2">テスト</th>
+			<th scope="col" colspan="25">YYYY.MM.DD</th>
+		</tr>
+		<tr>
+			<th scope="col" colspan="1">タイトル</th>
+			<th scope="col" colspan="1">日にち</th>
+			<th scope="col" colspan="1">時間</th>
+			<th scope="col" colspan="1">受付の有無</th>
+			<th scope="col" colspan="1">受付URL</th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr class="mainraw">
-			<td>テスト</td>
-			<td>テスト</td>
+			<td>骸骨君物語</td>
+			<td>12.01.01</td>
+			<td>16:20</td>
+			<td>有</td>
+			<td>http://www.yahoo.com</td>
 		</tr>
 		<tr class="mainraw">
-			<td>テスト</td>
-			<td>テスト</td>
+			<td>肋骨君物語</td>
+			<td>12.03.01</td>
+			<td>11:20</td>
+			<td>有</td>
+			<td>http://www.yahoo.com</td>
+		</tr>
+		<tr class="mainraw">
+			<td>足骨君物語</td>
+			<td>12.02.01</td>
+			<td>16:20</td>
+			<td>有</td>
+			<td>http://www.yahoo.com</td>
+		</tr>
+		<tr class="mainraw">
+			<td>鎖骨君物語</td>
+			<td>12.05.01</td>
+			<td>16:20</td>
+			<td>有</td>
+			<td>http://www.yahoo.com</td>
+		</tr>
+		<tr class="mainraw">
+			<td>背骨君物語</td>
+			<td>12.01.11</td>
+			<td>16:25</td>
+			<td>有</td>
+			<td>http://www.yahoo.com</td>
+		</tr>
+		<tr class="mainraw">
+			<td>肋骨君物語</td>
+			<td>11.01.01</td>
+			<td>06:20</td>
+			<td>有</td>
+			<td>http://www.yahoo.com</td>
 		</tr>
 	</tbody>
 </table>
