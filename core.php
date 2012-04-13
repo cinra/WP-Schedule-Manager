@@ -50,10 +50,12 @@ a.wpsm_maenas:hover {
 			wpsm_time="wpsm_time[" + count + "]";
 			wpsm_yoyaku="wpsm_yoyaku[" + count + "]";
 			wpsm_URL="wpsm_URL[" + count + "]";
-			$("."+wpsm).children(".day").children("input").attr("name",wpsm_day);
-			$("."+wpsm).children(".time").children("input").attr("name",wpsm_time);
-			$("."+wpsm).children(".yoyaku").children("input").attr("name",wpsm_yoyaku);
-			$("."+wpsm).children(".URL").children("input").attr("name",wpsm_URL);
+			//$("."+wpsm).children(".day").children("input").attr("name",wpsm_day);
+			$("."+wpsm).children(".day").children("input").attr({name:wpsm_day,value:""});
+
+			$("."+wpsm).children(".time").children("input").attr({name:wpsm_time,value:""});
+			$("."+wpsm).children(".yoyaku").children("input").attr({name:wpsm_yoyaku,value:0});
+			$("."+wpsm).children(".URL").children("input").attr({name:wpsm_URL,value:""});
 			$(".wpsm_maenas").css("display","inline");
 			
 			
