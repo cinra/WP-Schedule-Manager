@@ -44,7 +44,6 @@ class wp_schedule_manager {
 		//add_post_custom();
 		
 		exit();
-		
 	}
 	
 	function __construct() {
