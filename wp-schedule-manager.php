@@ -15,7 +15,7 @@ add_action('save_post', array(&$wpsm, 'set'), 10);
 
 add_action('admin_menu', 'wpsm_add_sidemenu');
 function wpsm_add_sidemenu() {
-	add_menu_page('schedule', 'スケジュール', 7, 'wpsm', 'admin_schedule_list');
+	add_menu_page('schedule', 'schedule', 7, 'wpsm', 'admin_schedule_list');
  	add_submenu_page('wpsm', 'schedule','編集', 7, 'edit', 'admin_schedule_list');
 }
 
@@ -118,7 +118,7 @@ EOF;
 function wpsm_init_adminmenu() {
 	add_meta_box('schedule_manager', __('schedule'), 'wpsm_output_metabox', 'post', 'normal');
 }
-add_action('admin_menu', 'wpsm_init_adminmenu');
+add_action('admin_init', 'wpsm_init_adminmenu');
 
 function wpsm_output_metabox() {
 	echo <<<EOF
@@ -161,12 +161,14 @@ a.wpsm_maenas:hover {
 			//console.log($("."+wpsm).children());
 			wpsm_day="wpsm_day[" + count + "]";
 			wpsm_time="wpsm_time[" + count + "]";
+			wspm_description="wspm_description[" + count + "]";
 			wpsm_yoyaku="wpsm_yoyaku[" + count + "]";
+			
 			wpsm_URL="wpsm_url[" + count + "]";
 			//$("."+wpsm).children(".day").children("input").attr("name",wpsm_day);
 			$("."+wpsm).children(".day").children("input").attr({name:wpsm_day,value:""});
-
 			$("."+wpsm).children(".time").children("input").attr({name:wpsm_time,value:""});
+			$("."+wpsm).children(".description").children("input").attr({name:wspm_description,value:""});
 			$("."+wpsm).children(".yoyaku").children("input").attr({name:wpsm_yoyaku,value:0});
 			$("."+wpsm).children(".URL").children("input").attr({name:wpsm_URL,value:""});
 			$(".wpsm_maenas").css("display","inline");
@@ -184,6 +186,7 @@ a.wpsm_maenas:hover {
 			$(this).parent().parent().css("display","none");
 			$(this).parent().parent().children(".day").children("input").attr("value","delete");
 			$(this).parent().parent().children(".time").children("input").attr("value","delete");
+			$(this).parent().parent().children(".description").children("input").attr("value","delete");
 			$(this).parent().parent().children(".yoyaku").children("input").attr("value","0");
 			$(this).parent().parent().children(".URL").children("input").attr("value","delete");
 						
@@ -209,6 +212,11 @@ a.wpsm_maenas:hover {
 	<label >時間</label>
 	<input type="text" name="wpsm_time[0]" size="50" tabindex="1" value="" id="sc-time" autocomplete="off">
 	</p>
+	<p class="description">
+	<label >Description</label>
+	<input type="text" name="wpsm_description[0]" size="50" tabindex="1" value="" id="sc-time" autocomplete="off">
+	</p>
+	
 	<p class="yoyaku">
 	<label >予約可</label>
 	<input type="checkbox" name="wpsm_yoyaku[0]" value="0">
