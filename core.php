@@ -49,7 +49,7 @@ a.wpsm_maenas:hover {
 			wpsm_day="wpsm_day[" + count + "]";
 			wpsm_time="wpsm_time[" + count + "]";
 			wpsm_yoyaku="wpsm_yoyaku[" + count + "]";
-			wpsm_URL="wpsm_URL[" + count + "]";
+			wpsm_URL="wpsm_url[" + count + "]";
 			//$("."+wpsm).children(".day").children("input").attr("name",wpsm_day);
 			$("."+wpsm).children(".day").children("input").attr({name:wpsm_day,value:""});
 
@@ -98,7 +98,7 @@ a.wpsm_maenas:hover {
 	</p>
 	<p class="yoyaku">
 	<label >予約可</label>
-	<input type="checkbox" name="wpsm-yoyaku[0]" value="0">
+	<input type="checkbox" name="wpsm_yoyaku[0]" value="0">
 	</p>
 	<p class="URL">
 	<label >URL</label>
