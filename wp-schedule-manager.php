@@ -38,7 +38,7 @@ class wp_schedule_manager {
 		);
 		if (is_array($usr_opt)) $opt = array_merge($opt, $usr_opt);
 		
-		echo 'POSTID: '.$opt['post_id'];
+		#echo 'POSTID: '.$opt['post_id'];
 		#print_r($_POST);
 		
 		//add_post_custom();
@@ -60,15 +60,29 @@ function wpsm_add_sidemenu() {
 }
 
 function admin_schedule_list() {
+	
+	$post = get_posts();
+	
+	$options = "";
+	foreach ($post as $p) {
+		$options .= '<option value="'.$p->ID.'">'.$p->post_title.'</option>';
+	}
+	
 	echo '<div class="wrap">';
 	echo '<div id="icon-options-general" class="icon32"><br></div>';
 	echo "<h2>スケジュール</h2>";
 	echo <<<EOF
-<div class="subsubsub"></div>
+<div class="subsubsub">前の月 | 次の月</div>
 
 <table class="widefat" style="margin-bottom: 1em;">
 	<tr>
-		<td>UUUUUU</td>
+		<td>
+			<select>
+EOF;
+	echo $options;
+	echo <<<EOF
+			</select>
+		</td>
 	</tr>
 </table>
 
