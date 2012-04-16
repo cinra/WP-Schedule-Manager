@@ -3,7 +3,7 @@
 function wpsm_init_adminmenu() {
 	add_meta_box('schedule_manager', __('schedule'), 'wpsm_output_metabox', 'post', 'normal');
 }
-add_action('admin_init', 'wpsm_init_adminmenu');
+add_action('add_meta_boxes', 'wpsm_init_adminmenu');
 
 function wpsm_output_metabox() {
 

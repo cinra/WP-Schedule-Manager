@@ -110,17 +110,39 @@ function admin_schedule_list() {
 		echo "<h2>スケジュール</h2>";
 		
 		$next = date('Y-m-d', mktime(0, 0, 0, $date_a[1]+1, $date_a[2], $date_a[0]));
-		$back = date('Y-m-d', mktime(0, 0, 0, $date_a[1]-1, $date_a[2], $date_a[0]));
-	
-	    echo '<div class="subsubsub"><a href="admin.php?page=wpsm&date='.$back.'">前の月</a> | <a href="admin.php?page=wpsm&date='.$now.'">当月</a> | <a href="admin.php?page=wpsm&date='.$next.'">次の月</a></div>';
+		$prev = date('Y-m-d', mktime(0, 0, 0, $date_a[1]-1, $date_a[2], $date_a[0]));
+		
+		get_monthly_pager($now, $next, $prev);
 ?>
-<table class="widefat" style="margin-bottom: 1em;">
+<?php /* table class="widefat" style="margin-bottom: 1em;">
 	<tr>
 		<td>
 			<select><?php echo $options;?></select>
 		</td>
 	</tr>
-</table>
+</table */ ?>
+
+
+
+<?php
+	get_list_table($wpsm->get(array(
+	 	'date'		=> $datestr,
+	 	'term_by'	=> 'month',
+	 	'term'		=> 1
+	)), $datestr);
+	get_monthly_pager($now, $next, $prev);
+	}
+	
+	
+	echo '</div>';
+}
+
+
+function get_list_table($dat = array(), $datestr = "") {
+if (empty($datestr)) $datestr = $_GET['date'];
+	?>
+
+
 
 <form>
 <table class="widefat">
@@ -138,11 +160,7 @@ function admin_schedule_list() {
 	</thead>
 	<tbody>
 <?php
-	$dat = $wpsm->get(array(
-	 	'date'		=> $datestr,
-	 	'term_by'	=> 'month',
-	 	'term'		=> 1
-	));
+	
 	 
 	if (!empty($dat)) {
 		foreach ($dat as $d) {
@@ -152,7 +170,7 @@ function admin_schedule_list() {
 			
 			#print_r($check);
 			echo	'<tr class="mainraw">';
-			echo    '<td><a href="admin.php?page=wpsm&post_id='.$pp->ID.'">'.$pp->post_title.'</a></td>';
+			echo    '<td><a href="post.php?post='.$pp->ID.'&action=edit">'.$pp->post_title.'</a></td>';
 			echo    '<td><a href="admin.php?page=wpsm&date_id='.$d->ID.'">'.$d->date.'</a></td>';		
 			echo	'<td>'.$d->time.'</td>';
 			echo	'<td>'.$check.'</td>';
@@ -165,16 +183,17 @@ function admin_schedule_list() {
 </table>
 </form>
 
-<?php
-	}
-	
-	echo '</div>';
+	<?php
 }
 
-
-
-
-
+function get_monthly_pager($now, $next, $prev) {
+	$output = '<div class="subsubsub">';
+	$output .= '<a href="admin.php?page=wpsm&date='.$prev.'">前の月</a> | ';
+	$output .= '<a href="admin.php?page=wpsm&date='.$now.'">当月</a> | ';
+	$output .= '<a href="admin.php?page=wpsm&date='.$next.'">次の月</a>';
+	$output .= '</div>';
+	echo $output;
+}
 
 if(defined('WP_PLUGIN_URL')) {
 	
