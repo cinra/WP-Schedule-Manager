@@ -21,28 +21,36 @@ class wp_schedule_manager {
 		$opt = array_merge($opt, $usr_opt);
 		#print_r($opt);#exit;
 		
-		$sql = "SELECT * FROM ".WPSM_DB_TABLENAME;
-		$where = array();
+		$sql = array();
 		
-		// 投稿記事
-		if ($opt['post_id']) $where[] = "`post_id` = '".$opt['post_id']."'";
 		
-		// カテゴリフィルター
-		if ($opt['category']) {
+		if ($opt['post_id']) {// 投稿記事指定
+			$sql['where'][] = "`post_id` = '".$opt['post_id']."'";
+		} else if ($opt['category']) {// カテゴリフィルター
+			//SELECT * FROM wp_wpsm_cal WHERE (`date` >= '2011-04-16' AND `date` < '2015-04-16') AND `post_id` = (SELECT object_id FROM wp_term_relationships WHERE `object_id` = 47 AND term_taxonomy_id = 1) ORDER BY `date` asc
+			
+			//$sql['str'] = "SELECT * FROM ".WPSM_DB_TABLENAME;
+			
+			$tmpsql = "`post_id` = (SELECT object_id FROM wp_term_relationships WHERE ";
+			$tmpsql .= "`term_taxonomy_id` = ";
+			
+			
 			$cat = explode(',', $opt['category']);
 			if (!empty($cat)) {
-				$catstr = "";
 				foreach($cat as $c) {
 					if (!is_integer($c)) {
 						$tmpobj = get_term_by('slug', $c, 'category');
-						$c = $tmpobj->ID;
+						$c = $tmpobj->term_id;
 					}
 					$catarr[] = $c;
 				}
-				$catstr = implode(' OR ', $catarr);
+				$tmpsql .= implode(' OR `term_taxonomy_id` = ', $catarr);
 			}
 			
-			print_r($cat);exit;
+			$tmpsql .= ")";
+			#exit($tmpsql);
+			$sql['where'][] = $tmpsql;
+			//print_r($cat);exit;
 		}
 		
 		// 日付（開始日時と終了日時）
@@ -58,16 +66,17 @@ class wp_schedule_manager {
 			
 			$end_str = date('Y-m-d', mktime(0, 0, 0, $date_end[1], $date_end[2], $date_end[0]));
 			
-			$where[] = "(`date` >= '".$opt['date']."' AND `date` < '".$end_str."')";
+			$sql['where'][] = "(`date` >= '".$opt['date']."' AND `date` < '".$end_str."')";
 		}
 		
 		// SQL作成
-		if (!empty($where)) $sql .= " WHERE ".implode(' AND ', $where);
+		if (empty($sql['str'])) $sql['str'] = "SELECT * FROM ".WPSM_DB_TABLENAME;
+		if (!empty($sql['where'])) $sql['str'] .= " WHERE ".implode(' AND ', $sql['where']);
 		
-		$sql .= " ORDER BY `".$opt['order_by']."` ".$opt['order'];
+		$sql['str'] .= " ORDER BY `".$opt['order_by']."` ".$opt['order'];
 		
-		#exit($sql);
-		print_r($wpdb->get_results($sql));
+		exit($sql['str']);
+		print_r($wpdb->get_results($sql['str']));
 		#exit();
 		
 		// Test
