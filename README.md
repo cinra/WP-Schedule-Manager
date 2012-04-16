@@ -1,4 +1,7 @@
-WP-Schedule-Manager
-Usage
+#WP-Schedule-Manager
+
+##Usage
 
 $wpsm->get()
+
+***
