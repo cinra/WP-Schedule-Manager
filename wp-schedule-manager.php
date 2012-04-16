@@ -10,8 +10,9 @@ License: not-yet
 */
 
 include(dirname(__FILE__).'/core.php');
-
-add_action('save_post', array(&$wpsm, 'set'), 10);
+wp_enqueue_script('jquery');
+wp_enqueue_script('jquery-ui-core');
+wp_enqueue_script('jquery-ui-datepicker',  FILE_URL . 'jquery.ui.datepicker.js', array('jquery','jquery-ui-core') );add_action('save_post', array(&$wpsm, 'set'), 10);
 
 add_action('admin_menu', 'wpsm_add_sidemenu');
 function wpsm_add_sidemenu() {
@@ -21,6 +22,7 @@ function wpsm_add_sidemenu() {
 
 function admin_schedule_list() {
 	
+	global $wpsm;
 	$post = get_posts();
 	
 	$options = "";
@@ -61,48 +63,34 @@ EOF;
 		</tr>
 	</thead>
 	<tbody>
-		<tr class="mainraw">
-			<td>骸骨君物語</td>
-			<td>12.01.01</td>
-			<td>16:20</td>
-			<td>有</td>
-			<td>http://www.yahoo.com</td>
-		</tr>
-		<tr class="mainraw">
-			<td>肋骨君物語</td>
-			<td>12.03.01</td>
-			<td>11:20</td>
-			<td>有</td>
-			<td>http://www.yahoo.com</td>
-		</tr>
-		<tr class="mainraw">
-			<td>足骨君物語</td>
-			<td>12.02.01</td>
-			<td>16:20</td>
-			<td>有</td>
-			<td>http://www.yahoo.com</td>
-		</tr>
-		<tr class="mainraw">
-			<td>鎖骨君物語</td>
-			<td>12.05.01</td>
-			<td>16:20</td>
-			<td>有</td>
-			<td>http://www.yahoo.com</td>
-		</tr>
-		<tr class="mainraw">
-			<td>背骨君物語</td>
-			<td>12.01.11</td>
-			<td>16:25</td>
-			<td>有</td>
-			<td>http://www.yahoo.com</td>
-		</tr>
-		<tr class="mainraw">
-			<td>肋骨君物語</td>
-			<td>11.01.01</td>
-			<td>06:20</td>
-			<td>有</td>
-			<td>http://www.yahoo.com</td>
-		</tr>
+EOF;
+	$wpsmdata = $wpsm->get(array(
+	 	
+	 	'date'=> '1 year ago',
+	 	'term_by' => 'year',
+	 	'term'	=> 4
+	 	
+	 ));
+	 
+	 print_r($wpsdata);
+	
+	#if (!empty($wpsdata)) {
+	foreach ($wpsmdata as $d) {
+	$pp = get_post( $d->post_id);
+	$is_link = $d->is_link;
+	if($is_link){$check="有";}else{$check = "無";}
+	
+	print_r($check);
+	echo	'<tr class="mainraw">';
+	echo    '<td>'.$pp->post_title.'</td>';
+	echo    '<td>'.$d->date.'</td>';		
+	echo	'<td>'.$d->time.'</td>';
+	echo	'<td>'.$check.'</td>';
+	echo	'<td>'.$d->url.'</td>';
+	echo	'</tr>';
+	}
+	#}
+	echo <<<EOF
 	</tbody>
 </table>
 </form>
@@ -142,12 +130,14 @@ a.wpsm_maenas:hover {
 <script type="text/javascript">
 (function($) {
 
-
 	$(function() {
+$('#sc-data').datepicker({ dateFormat: 'yy-mm-dd' });
+
 	 var count=0;
 	 var alcount=0;
 	 var wpsm="wpsm_daybox";
 	 var wpsmaf="wpsm_daybox0";
+	 	
 		$('.wpsm_plus').live('click', function() {
 			var html =$('.wpsm_daybox0').html();
 			count++;
@@ -206,7 +196,7 @@ a.wpsm_maenas:hover {
 <div class="wpsm_daybox0">
 	<p class="day">
 	<label >日付</label>
-	<input type="text" name="wpsm_day[0]" size="50" tabindex="1" value="" id="sc-data" autocomplete="off">
+	<input type="text" name="wpsm_day[0]" size="50" tabindex="1"  id="sc-data" autocomplete="off">
 	</p>
 	<p class="time">
 	<label >時間</label>
@@ -224,6 +214,9 @@ a.wpsm_maenas:hover {
 	<p class="URL">
 	<label >URL</label>
 	<input type="text" name="wpsm_url[0]" size="100" tabindex="1" value="" id="sc-URL" autocomplete="off">
+	</p>
+	
+	
 	<p><a class="wpsm_plus">+</a></p>
 	<p><a class="wpsm_maenas">-</a></p>
 </div>
