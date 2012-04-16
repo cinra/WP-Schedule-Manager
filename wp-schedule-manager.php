@@ -29,13 +29,18 @@ function admin_schedule_list() {
 	foreach ($post as $p) {
 		$options .= '<option value="'.$p->ID.'">'.$p->post_title.'</option>';
 	}
+	$date_all=$_GET['date'];
+	$date_a=explode('-',$date_all);
 	
+	print_r($date_a);
 	echo '<div class="wrap">';
 	echo '<div id="icon-options-general" class="icon32"><br></div>';
 	echo "<h2>スケジュール</h2>";
-	echo <<<EOF
-<div class="subsubsub">前の月 | 次の月</div>
+	$next=date('Y-m-d', mktime(0, 0, 0, $date_a[1]+1, $date_a[2], $date_a[0]));
+	$back=date('Y-m-d', mktime(0, 0, 0, $date_a[1]-1, $date_a[2], $date_a[0]));
 
+     echo '<div class="subsubsub"><a href="admin.php?page=wpsm&date='.$back.'">前の月</a> | <a href="admin.php?page=wpsm&date='.$next.'">次の月</div>';
+	echo <<<EOF
 <table class="widefat" style="margin-bottom: 1em;">
 	<tr>
 		<td>
@@ -66,7 +71,7 @@ EOF;
 EOF;
 	$wpsmdata = $wpsm->get(array(
 	 	
-	 	'date'=> '1 year ago',
+	 	'date'=> '',
 	 	'term_by' => 'year',
 	 	'term'	=> 4
 	 	
