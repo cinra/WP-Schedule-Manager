@@ -19,7 +19,6 @@ class wp_schedule_manager {
 			'order'			=> 'asc'
 		);
 		$opt = array_merge($opt, $usr_opt);
-		#print_r($opt);#exit;
 		
 		$sql = array();
 		
