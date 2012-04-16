@@ -27,13 +27,11 @@ class wp_schedule_manager {
 		if ($opt['post_id']) {// 投稿記事指定
 			$sql['where'][] = "`post_id` = '".$opt['post_id']."'";
 		} else if ($opt['category']) {// カテゴリフィルター
-			//SELECT * FROM wp_wpsm_cal WHERE (`date` >= '2011-04-16' AND `date` < '2015-04-16') AND `post_id` = (SELECT object_id FROM wp_term_relationships WHERE `object_id` = 47 AND term_taxonomy_id = 1) ORDER BY `date` asc
+			//SELECT * FROM wp_wpsm_cal  WHERE (`date` >= '2011-04-16' AND `date` < '2015-04-16') AND term_taxonomy_id = 1 ORDER BY `date` asc
 			
-			//$sql['str'] = "SELECT * FROM ".WPSM_DB_TABLENAME;
+			$sql['str'] = "SELECT * FROM ".WPSM_DB_TABLENAME."  INNER JOIN wp_term_relationships ON wp_wpsm_cal.post_id = wp_term_relationships.object_id";
 			
-			$tmpsql = "`post_id` = (SELECT object_id FROM wp_term_relationships WHERE ";
-			$tmpsql .= "`term_taxonomy_id` = ";
-			
+			$tmpsql .= "(`term_taxonomy_id` = ";
 			
 			$cat = explode(',', $opt['category']);
 			if (!empty($cat)) {
@@ -75,19 +73,17 @@ class wp_schedule_manager {
 		
 		$sql['str'] .= " ORDER BY `".$opt['order_by']."` ".$opt['order'];
 		
-		exit($sql['str']);
-		print_r($wpdb->get_results($sql['str']));
+		#exit($sql['str']);
+		#print_r($wpdb->get_results($sql['str']));
 		#exit();
 		
 		// Test
 		if (!is_admin()) {
-			#print_r($opt);
-			
-			echo '<br />'.strtotime($opt['date']);
-			echo '<br />'.time();
-			
-			#exit;
+			#echo '<br />'.strtotime($opt['date']);
+			#echo '<br />'.time();
 		}
+		
+		return $wpdb->get_results($sql['str']);
 	}
 	
 	public function set($usr_opt = array()) {
