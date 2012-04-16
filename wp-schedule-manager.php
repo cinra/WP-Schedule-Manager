@@ -29,13 +29,18 @@ function admin_schedule_list() {
 	foreach ($post as $p) {
 		$options .= '<option value="'.$p->ID.'">'.$p->post_title.'</option>';
 	}
+	$date_all=$_GET['date'];
+	$date_a=explode('-',$date_all);
 	
+	print_r($date_a);
 	echo '<div class="wrap">';
 	echo '<div id="icon-options-general" class="icon32"><br></div>';
 	echo "<h2>スケジュール</h2>";
-	echo <<<EOF
-<div class="subsubsub">前の月 | 次の月</div>
+	$next=date('Y-m-d', mktime(0, 0, 0, $date_a[1]+1, $date_a[2], $date_a[0]));
+	$back=date('Y-m-d', mktime(0, 0, 0, $date_a[1]-1, $date_a[2], $date_a[0]));
 
+     echo '<div class="subsubsub"><a href="admin.php?page=wpsm&date='.$back.'">前の月</a> | <a href="admin.php?page=wpsm&date='.$next.'">次の月</div>';
+	echo <<<EOF
 <table class="widefat" style="margin-bottom: 1em;">
 	<tr>
 		<td>
@@ -66,7 +71,7 @@ EOF;
 EOF;
 	$wpsmdata = $wpsm->get(array(
 	 	
-	 	'date'=> '1 year ago',
+	 	'date'=> '',
 	 	'term_by' => 'year',
 	 	'term'	=> 4
 	 	
@@ -109,6 +114,14 @@ function wpsm_init_adminmenu() {
 add_action('admin_init', 'wpsm_init_adminmenu');
 
 function wpsm_output_metabox() {
+
+	global $wpsm, $post;
+	
+	//exit($post->ID);
+	
+	$dat = $wpsm->get(array('post_id' => $post->ID));
+	if (empty($dat)) $dat = array('nodata');
+	
 	echo <<<EOF
 
 <style type="text/css">
@@ -163,16 +176,11 @@ $('#sc-data').datepicker({ dateFormat: 'yy-mm-dd' });
 			$("."+wpsm).children(".URL").children("input").attr({name:wpsm_URL,value:""});
 			$(".wpsm_maenas").css("display","inline");
 			
-			
-			
-			//
 			wpsmaf=wpsm;
 			wpsm="wpsm_daybox";
-						
-
 		});
-		$('.wpsm_maenas').live('click', function() {
-			console.log($(this).parent().parent());
+		/*$('.wpsm_maenas').live('click', function() {
+			//console.log($(this).parent().parent());
 			$(this).parent().parent().css("display","none");
 			$(this).parent().parent().children(".day").children("input").attr("value","delete");
 			$(this).parent().parent().children(".time").children("input").attr("value","delete");
@@ -186,44 +194,43 @@ $('#sc-data').datepicker({ dateFormat: 'yy-mm-dd' });
 			if(1>alcount){
 				$(".wpsm_maenas").css("display","none");
 			}
-			
-			
-		});
+		});*/
 	});
 })(jQuery);
 </script>
+EOF;
 
-<div class="wpsm_daybox0">
+	echo '<div class="wpsm_daybox0">';
+	
+	foreach($dat as $d):
+	print_r($d);?>
 	<p class="day">
-	<label >日付</label>
-	<input type="text" name="wpsm_day[0]" size="50" tabindex="1"  id="sc-data" autocomplete="off">
+		<label>日付</label>
+		<input type="text" name="wpsm_day[0]" size="50" tabindex="1"  id="sc-data" autocomplete="off"<?php if(isset($d->date)):?> value="<?php echo $d->date?>"<?php endif;?> />
 	</p>
 	<p class="time">
-	<label >時間</label>
-	<input type="text" name="wpsm_time[0]" size="50" tabindex="1" value="" id="sc-time" autocomplete="off">
+		<label>時間</label>
+		<input type="text" name="wpsm_time[0]" size="50" tabindex="1" id="sc-time" autocomplete="off"<?php if(isset($d->time)):?> value="<?php echo $d->time?>"<?php endif;?> />
 	</p>
 	<p class="description">
-	<label >Description</label>
-	<input type="text" name="wpsm_description[0]" size="50" tabindex="1" value="" id="sc-time" autocomplete="off">
+		<label>概要</label>
+		<input type="text" name="wpsm_description[0]" size="50" tabindex="1" id="sc-description" autocomplete="off"<?php if(isset($d->description)):?> value="<?php echo $d->description?>"<?php endif;?> />
 	</p>
 	
 	<p class="yoyaku">
-	<label >予約可</label>
-	<input type="checkbox" name="wpsm_yoyaku[0]" value="0">
+		<label>予約可</label>
+		<input type="checkbox" name="wpsm_yoyaku[0]"<?php if(isset($d->yoyaku)):?> value="<?php echo $d->yoyaku?>"<?php endif;?> />
 	</p>
 	<p class="URL">
-	<label >URL</label>
-	<input type="text" name="wpsm_url[0]" size="100" tabindex="1" value="" id="sc-URL" autocomplete="off">
+		<label>URL</label>
+		<input type="text" name="wpsm_url[0]" size="100" tabindex="1" id="sc-URL" autocomplete="off"<?php if(isset($d->url)):?> value="<?php echo $d->url?>"<?php endif;?> />
 	</p>
+	<?php endforeach;
 	
-	
+	echo <<<EOF
 	<p><a class="wpsm_plus">+</a></p>
 	<p><a class="wpsm_maenas">-</a></p>
 </div>
-
-
-
-
 EOF;
 }
 
