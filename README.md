@@ -24,6 +24,7 @@ Wordpressで記事毎にスケジュールを管理するプラグイン。
 * order - ソート順。'ASC'|'DESC'（デフォルト：ASC）
 
 例：
+
 	$wpsm->get(array(
 		'post_id'	=> 1 //記事ID
 		'date'		=> '1 year ago', //一ヶ月前から
