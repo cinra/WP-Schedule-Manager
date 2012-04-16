@@ -14,7 +14,9 @@ include(dirname(__FILE__).'/adminmenu.php');
 
 wp_enqueue_script('jquery');
 wp_enqueue_script('jquery-ui-core');
-wp_enqueue_script('jquery-ui-datepicker',  FILE_URL . 'jquery.ui.datepicker.js', array('jquery','jquery-ui-core') );add_action('save_post', array(&$wpsm, 'set'), 10);
+wp_enqueue_script('jquery-ui-datepicker',  FILE_URL . 'jquery.ui.datepicker.js', array('jquery','jquery-ui-core') );
+
+add_action('save_post', array(&$wpsm, 'set'), 10);
 
 add_action('admin_menu', 'wpsm_add_sidemenu');
 function wpsm_add_sidemenu() {
@@ -165,7 +167,7 @@ if (empty($datestr)) $datestr = $_GET['date'];
 	if (!empty($dat)) {
 		foreach ($dat as $d) {
 			$pp = get_post($d->post_id);
-			$is_link = $d->is_link;
+			$is_link = $d->status;
 			$check = ($is_link) ? "有" : "無";
 			
 			#print_r($check);

@@ -122,38 +122,40 @@ a.wpsm_maenas:hover {
 <?php
 
 	
-	
+	$c = 0;
 	foreach($dat as $d):
-
+	
 	print_r($d);?>
 	<div class="wpsm_daybox<?php echo $count ?> box ">
 	<p class="day">
 		<label>日付</label>
-		<input type="text" name="wpsm_day[0]" size="50" tabindex="1" class="sc-data" autocomplete="off"<?php if(isset($d->date)):?> value="<?php echo $d->date?>"<?php endif;?> />
+		<input type="text" name="wpsm_day[<?php echo $c?>]" size="50" tabindex="1" class="sc-data" autocomplete="off"<?php if(isset($d->date)):?> value="<?php echo $d->date?>"<?php endif;?> />
 	</p>
 	<p class="time">
 		<label>時間</label>
-		<input type="text" name="wpsm_time[0]" size="50" tabindex="1" id="sc-time" autocomplete="off"<?php if(isset($d->time)):?> value="<?php echo $d->time?>"<?php endif;?> />
+		<input type="text" name="wpsm_time[<?php echo $c?>]" size="50" tabindex="1" id="sc-time" autocomplete="off"<?php if(isset($d->time)):?> value="<?php echo $d->time?>"<?php endif;?> />
 	</p>
 	<p class="description">
 		<label>概要</label>
-		<input type="text" name="wpsm_description[0]" size="50" tabindex="1" id="sc-description" autocomplete="off"<?php if(isset($d->description)):?> value="<?php echo $d->description?>"<?php endif;?> />
+		<input type="text" name="wpsm_description[<?php echo $c?>]" size="50" tabindex="1" id="sc-description" autocomplete="off"<?php if(isset($d->description)):?> value="<?php echo $d->description?>"<?php endif;?> />
 	</p>
 	
 	<p class="yoyaku">
 		<label>予約可</label>
-		<input type="checkbox" name="wpsm_yoyaku[0]"<?php if(isset($d->yoyaku)):?> value="<?php echo $d->yoyaku?>"<?php endif;?> />
+		<input type="checkbox" name="wpsm_yoyaku[<?php echo $c?>]"<?php if($d->status):?> checked="checked"<?php endif;?> />
 	</p>
 	<p class="URL">
 		<label>URL</label>
-		<input type="text" name="wpsm_url[0]" size="100" tabindex="1" id="sc-URL" autocomplete="off"<?php if(isset($d->url)):?> value="<?php echo $d->url?>"<?php endif;?> />
+		<input type="text" name="wpsm_url[<?php echo $c?>]" size="100" tabindex="1" id="sc-URL" autocomplete="off"<?php if(isset($d->url)):?> value="<?php echo $d->url?>"<?php endif;?> />
 	</p>
 <p><a class="wpsm_plus">+</a></p>
 <p><a class="wpsm_maenas">-</a></p>
 </div>
 <?php $count++?>
 
-	<?php endforeach;
+	<?php 
+	$c++;
+	endforeach;
 	
 
 	

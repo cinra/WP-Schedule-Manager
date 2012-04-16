@@ -4,7 +4,7 @@ CREATE TABLE  `{{YOUR_DB}}`.`wp_wpsm_cal` (
 `time` TIME NULL DEFAULT NULL ,
 `description` TEXT NULL DEFAULT NULL ,
 `post_id` BIGINT( 20 ) NOT NULL ,
-`is_link` TINYINT NOT NULL ,
+`status` TINYINT NOT NULL ,
 `url` VARCHAR( 255 ) NULL DEFAULT NULL ,
 PRIMARY KEY (  `ID` )
 ) ENGINE = MYISAM COMMENT =  'WP_Schedule_Manager';
