@@ -25,33 +25,99 @@ function wpsm_add_sidemenu() {
 function admin_schedule_list() {
 	
 	global $wpsm;
-	$post = get_posts();
-	
-	$options = "";
-	foreach ($post as $p) {
-		$options .= '<option value="'.$p->ID.'">'.$p->post_title.'</option>';
-	}
-	
-	$date_all=$_GET['date'];
-	$date_a=explode('-',$date_all);
-	
-	print_r($date_a);
 	echo '<div class="wrap">';
-	echo '<div id="icon-options-general" class="icon32"><br></div>';
-	echo "<h2>スケジュール</h2>";
-	$next=date('Y-m-d', mktime(0, 0, 0, $date_a[1]+1, $date_a[2], $date_a[0]));
-	$back=date('Y-m-d', mktime(0, 0, 0, $date_a[1]-1, $date_a[2], $date_a[0]));
+	
+	if ($_GET['post_id']) {//個別エントリ編集
+		
+		$wpsm->get(array(
+			
+		));
+		
+	} elseif ($_GET['date_id']) {//スケジュール編集
+		
+		print_r($_POST);
+		if (isset($_POST['wpsm_date_id'])) {
+			/*foreach ($_POST['wpsm_date_id'] as $k => $v) {
+				$wpsm->set(array('date_id' => $_POST['wpsm_date_id'][$k]));
+			}*/
+			$wpsm->set();
+		}
+		
+		
+		$dat = $wpsm->get(array(
+			'include'	=> explode(',', $_GET['date_id'])
+		));
+?>
 
-     echo '<div class="subsubsub"><a href="admin.php?page=wpsm&date='.$back.'">前の月</a> | <a href="admin.php?page=wpsm&date='.$next.'">次の月</div>';
-	echo <<<EOF
+<form method="POST">
+
+<?php //ここから、全て外部関数に置き換え?>
+<?php
+		if (!empty($dat)) :
+		foreach($dat as $d):
+?>
+
+<input type="hidden" name="wpsm_date_id[0]"<?php if(isset($d->ID)):?> value="<?php echo $d->ID?>"<?php endif;?> />
+<p class="day">
+	<label>日付</label>
+	<input type="text" name="wpsm_day[0]" size="50" tabindex="1"  id="sc-data" autocomplete="off"<?php if(isset($d->date)):?> value="<?php echo $d->date?>"<?php endif;?> />
+</p>
+<p class="time">
+	<label>時間</label>
+	<input type="text" name="wpsm_time[0]" size="50" tabindex="1" id="sc-time" autocomplete="off"<?php if(isset($d->time)):?> value="<?php echo $d->time?>"<?php endif;?> />
+</p>
+<p class="description">
+	<label>概要</label>
+	<input type="text" name="wpsm_description[0]" size="50" tabindex="1" id="sc-description" autocomplete="off"<?php if(isset($d->description)):?> value="<?php echo $d->description?>"<?php endif;?> />
+</p>
+
+<p class="yoyaku">
+	<label>予約可</label>
+	<input type="checkbox" name="wpsm_yoyaku[0]"<?php if(isset($d->yoyaku)):?> value="<?php echo $d->yoyaku?>"<?php endif;?> />
+</p>
+<p class="URL">
+	<label>URL</label>
+	<input type="text" name="wpsm_url[0]" size="100" tabindex="1" id="sc-URL" autocomplete="off"<?php if(isset($d->url)):?> value="<?php echo $d->url?>"<?php endif;?> />
+</p>
+<?php //ここまで、外部関数に置き換え?>
+
+<input type="submit" name="publish" id="publish" class="button-primary" value="<?php _e('公開')?>" tabindex="5" accesskey="p">
+</form>
+
+<?php
+		
+		endforeach;
+		endif;
+			
+	} else {
+		$post = get_posts();
+		
+		$options = "";
+		foreach ($post as $p) {
+			$options .= '<option value="'.$p->ID.'">'.$p->post_title.'</option>';
+		}
+		
+		
+		
+		// 日付を取得
+		$now		= date('Y-m-01');
+		$datestr	= ($_GET['date']) ? $_GET['date'] : $now;
+		$date_a		= explode('-', $datestr);
+		
+		#print_r($date_a);
+		
+		echo '<div id="icon-options-general" class="icon32"><br></div>';
+		echo "<h2>スケジュール</h2>";
+		
+		$next = date('Y-m-d', mktime(0, 0, 0, $date_a[1]+1, $date_a[2], $date_a[0]));
+		$back = date('Y-m-d', mktime(0, 0, 0, $date_a[1]-1, $date_a[2], $date_a[0]));
+	
+	    echo '<div class="subsubsub"><a href="admin.php?page=wpsm&date='.$back.'">前の月</a> | <a href="admin.php?page=wpsm&date='.$now.'">当月</a> | <a href="admin.php?page=wpsm&date='.$next.'">次の月</a></div>';
+?>
 <table class="widefat" style="margin-bottom: 1em;">
 	<tr>
 		<td>
-			<select>
-EOF;
-	echo $options;
-	echo <<<EOF
-			</select>
+			<select><?php echo $options;?></select>
 		</td>
 	</tr>
 </table>
@@ -60,7 +126,7 @@ EOF;
 <table class="widefat">
 	<thead>
 		<tr>
-			<th scope="col" colspan="25">YYYY.MM.DD</th>
+			<th scope="col" colspan="25"><?php echo $datestr?></th>
 		</tr>
 		<tr>
 			<th scope="col" colspan="1">タイトル</th>
@@ -71,39 +137,37 @@ EOF;
 		</tr>
 	</thead>
 	<tbody>
-EOF;
-	$wpsmdata = $wpsm->get(array(
-	 	
-	 	'date'=> '',
-	 	'term_by' => 'year',
-	 	'term'	=> 4
-	 	
-	 ));
+<?php
+	$dat = $wpsm->get(array(
+	 	'date'		=> $datestr,
+	 	'term_by'	=> 'month',
+	 	'term'		=> 1
+	));
 	 
-	 print_r($wpsdata);
-	
-	#if (!empty($wpsdata)) {
-	foreach ($wpsmdata as $d) {
-	$pp = get_post( $d->post_id);
-	$is_link = $d->is_link;
-	if($is_link){$check="有";}else{$check = "無";}
-	
-	print_r($check);
-	echo	'<tr class="mainraw">';
-	echo    '<td>'.$pp->post_title.'</td>';
-	echo    '<td>'.$d->date.'</td>';		
-	echo	'<td>'.$d->time.'</td>';
-	echo	'<td>'.$check.'</td>';
-	echo	'<td>'.$d->url.'</td>';
-	echo	'</tr>';
+	if (!empty($dat)) {
+		foreach ($dat as $d) {
+			$pp = get_post($d->post_id);
+			$is_link = $d->is_link;
+			$check = ($is_link) ? "有" : "無";
+			
+			#print_r($check);
+			echo	'<tr class="mainraw">';
+			echo    '<td><a href="admin.php?page=wpsm&post_id='.$pp->ID.'">'.$pp->post_title.'</a></td>';
+			echo    '<td><a href="admin.php?page=wpsm&date_id='.$d->ID.'">'.$d->date.'</a></td>';		
+			echo	'<td>'.$d->time.'</td>';
+			echo	'<td>'.$check.'</td>';
+			echo	'<td>'.$d->url.'</td>';
+			echo	'</tr>';
+		}
 	}
-	#}
-	echo <<<EOF
+?>
 	</tbody>
 </table>
 </form>
 
-EOF;
+<?php
+	}
+	
 	echo '</div>';
 }
 
