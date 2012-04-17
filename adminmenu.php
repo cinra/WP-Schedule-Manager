@@ -44,25 +44,19 @@ a.wpsm_maenas:hover {
 	 var wpsmaf="wpsm_daybox0";	
 	 count=$(".box").length;
 	 count=count-1;
-	 if(count>0){
+	 if (count>0) {
 	 	$(".wpsm_maenas").css("display","inline");
-	 
-	 	
 	 }
+	 
 		$('.wpsm_plus').live('click', function() {
 			var html =$('.wpsm_daybox0').html();
 			
-				console.log(count);
+			//console.log(count);
 				
-				 wpsmaf="wpsm_daybox"+count;
-				 console.log(wpsmaf);
+			wpsmaf="wpsm_daybox"+count;
+			//console.log(wpsmaf);
 			
-	 $('.datepicker').live('focusin',function(){
- 		$(".sc-data").datepicker({dateFormat: 'yy-mm-dd'});
-	});
-			
-			
-			count++;
+	 		count++;
 			alcount++;
 			wpsm=wpsm+count;
 			//console.log(html);
@@ -92,9 +86,8 @@ a.wpsm_maenas:hover {
 			wpsmaf=wpsm;
 			wpsm="wpsm_daybox";
 			
-
-
-
+			
+			$('.sc-data').datepicker('refresh');
 		});
 		/*$('.wpsm_maenas').live('click', function() {
 			//console.log($(this).parent().parent());
@@ -112,6 +105,8 @@ a.wpsm_maenas:hover {
 				$(".wpsm_maenas").css("display","none");
 			}
 		});*/
+		
+		//init();
 	}
 	
 	
