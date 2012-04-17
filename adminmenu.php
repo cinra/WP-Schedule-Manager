@@ -44,13 +44,15 @@ a.wpsm_maenas:hover {
 	 var wpsmaf="wpsm_daybox0";	
 	 count=$(".box").length;
 	 count=count-1;
+	 alcount = count;
 	 if (count>0) {
 	 	$(".wpsm_maenas").css("display","inline");
 	 }
-	 
-		$('.wpsm_plus').live('click', function() {
-			var html =$('.wpsm_daybox0').html();
+	 	var html =$('.wpsm_daybox0').html();
+	 	
+			$('.wpsm_plus').live('click', function() {
 			
+
 			//console.log(count);
 				
 			wpsmaf="wpsm_daybox"+count;
@@ -81,7 +83,6 @@ a.wpsm_maenas:hover {
 			$("."+wpsm).children(".URL").children("input").attr({name:wpsm_URL,value:""});
 			$(".wpsm_maenas").css("display","inline");
 
-
 			
 			wpsmaf=wpsm;
 			wpsm="wpsm_daybox";
@@ -89,22 +90,16 @@ a.wpsm_maenas:hover {
 			
 			$('.sc-data').datepicker('refresh');
 		});
-		/*$('.wpsm_maenas').live('click', function() {
-			//console.log($(this).parent().parent());
-			$(this).parent().parent().css("display","none");
-			$(this).parent().parent().children(".day").children("input").attr("value","delete");
-			$(this).parent().parent().children(".time").children("input").attr("value","delete");
-			$(this).parent().parent().children(".description").children("input").attr("value","delete");
-			$(this).parent().parent().children(".yoyaku").children("input").attr("value","0");
-			$(this).parent().parent().children(".URL").children("input").attr("value","delete");
-						
+		$('.wpsm_maenas').live('click', function() {
+			console.log($(this).parent().parent());
+			$(this).parent().parent().empty();				
 			alcount--;
 			console.log(alcount);
 			
 			if(1>alcount){
 				$(".wpsm_maenas").css("display","none");
 			}
-		});*/
+		});
 		
 		//init();
 	}
