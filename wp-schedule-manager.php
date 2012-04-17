@@ -16,7 +16,10 @@ wp_enqueue_script('jquery');
 wp_enqueue_script('jquery-ui-core');
 wp_enqueue_script('jquery-ui-datepicker',  FILE_URL . 'jquery.ui.datepicker.js', array('jquery','jquery-ui-core') );
 
-add_action('save_post', array(&$wpsm, 'set'), 10);
+add_action('edit_post', array(&$wpsm, 'set'), 10);//投稿記事またはページが更新・編集された場合（コメント含む）
+add_action('save_post', array(&$wpsm, 'set'), 10);//インポート、記事・ページ編集フォーム、XMLRPC、メール投稿で記事・ページが作成・更新された場合
+add_action('publish_post', array(&$wpsm, 'set'), 10);//公開記事が編集された場合
+add_action('transition_post_status', array(&$wpsm, 'set'), 10);//記事が公開に変更された場合
 
 add_action('admin_menu', 'wpsm_add_sidemenu');
 function wpsm_add_sidemenu() {
