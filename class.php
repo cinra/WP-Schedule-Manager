@@ -1,9 +1,5 @@
 <?php
 
-if (!defined('WPSM_DB_TABLENAME')) define('WPSM_DB_TABLENAME', 'wp_wpsm_cal');//table name
-
-// Tmp
-
 class wp_schedule_manager {
 	
 	public function get($usr_opt = array()) {
@@ -23,16 +19,12 @@ class wp_schedule_manager {
 		
 		$sql = array();
 		
-		
-		if ($opt['post_id']) {// ÊäïÁ®øË®ò‰∫ãÊåáÂÆö
+		if ($opt['post_id']) {// 記事ID
 			$sql['where'][] = "`post_id` = '".$opt['post_id']."'";
-		} else if ($opt['category']) {// „Ç´„ÉÜ„Ç¥„É™„Éï„Ç£„É´„Çø„Éº
-			//SELECT * FROM wp_wpsm_cal  WHERE (`date` >= '2011-04-16' AND `date` < '2015-04-16') AND term_taxonomy_id = 1 ORDER BY `date` asc
-			
-			$sql['str'] = "SELECT * FROM ".WPSM_DB_TABLENAME."  INNER JOIN wp_term_relationships ON wp_wpsm_cal.post_id = wp_term_relationships.object_id";
-			
+		} else if ($opt['category']) {// カテゴリフィルター
+			$sql['str'] = "SELECT * FROM ".WPSM_DB_TABLENAME;
+			$sql['str'] .= " INNER JOIN wp_term_relationships ON wp_wpsm_cal.post_id = wp_term_relationships.object_id";
 			$tmpsql .= "(`term_taxonomy_id` = ";
-			
 			$cat = explode(',', $opt['category']);
 			if (!empty($cat)) {
 				foreach($cat as $c) {
@@ -44,14 +36,11 @@ class wp_schedule_manager {
 				}
 				$tmpsql .= implode(' OR `term_taxonomy_id` = ', $catarr);
 			}
-			
 			$tmpsql .= ")";
-			#exit($tmpsql);
 			$sql['where'][] = $tmpsql;
-			//print_r($cat);exit;
 		}
 		
-		// Êó•‰ªòÔºàÈñãÂßãÊó•ÊôÇ„Å®ÁµÇ‰∫ÜÊó•ÊôÇÔºâ
+		// 日付を処理
 		if ($opt['date']) {
 			$opt['date'] = strtotime($opt['date']);
 			$opt['date'] = date('Y-m-d', $opt['date']);
@@ -72,25 +61,14 @@ class wp_schedule_manager {
 			$tmparr = array();
 			if (!is_array($opt['include'])) {$inc[] = $opt['include'];} else {$inc = $opt['include'];}
 			foreach ($inc as $i) $tmparr[] = "ID = ".$i;
-			#echo $tmpsql;
 			$sql['where'][] = implode(' OR ', $tmparr);
 		}
 		
-		// SQL‰ΩúÊàê
+		// SQL作成
 		if (empty($sql['str'])) $sql['str'] = "SELECT * FROM ".WPSM_DB_TABLENAME;
 		if (!empty($sql['where'])) $sql['str'] .= " WHERE ".implode(' AND ', $sql['where']);
 		
 		$sql['str'] .= " ORDER BY `".$opt['order_by']."` ".$opt['order'];
-		
-		#exit($sql['str']);
-		#print_r($wpdb->get_results($sql['str']));
-		#exit();
-		
-		// Test
-		if (!is_admin()) {
-			#echo '<br />'.strtotime($opt['date']);
-			#echo '<br />'.time();
-		}
 		
 		return $wpdb->get_results($sql['str']);
 	}
@@ -104,19 +82,16 @@ class wp_schedule_manager {
 		);
 		if (is_array($usr_opt)) $opt = array_merge($opt, $usr_opt);
 		
-		#print_r($_POST);exit;
-		
 		if (!isset($opt['post_id'])){//日付ID単位で更新
 			foreach($_POST['wpsm_date_id'] as $k => $d){
 				if ($_POST['wpsm_yoyaku'][$k] == 'on') $_POST['wpsm_yoyaku'][$k] = true;
-				$wpdb->update(WPSM_DB_TABLENAME,
-					array(
-						'date'			=> $_POST['wpsm_day'][$k],
-						'time'			=> $_POST['wpsm_time'][$k],
-						'description'	=> $_POST['wpsm_description'][$k],
-						'status'		=> $_POST['wpsm_yoyaku'][$k],
-						'url'			=> $_POST['wpsm_url'][$k]
-					), array('ID' => $_POST['wpsm_date_id'][$k]));
+				$wpdb->update(WPSM_DB_TABLENAME, array(
+					'date'			=> $_POST['wpsm_day'][$k],
+					'time'			=> $_POST['wpsm_time'][$k],
+					'description'	=> $_POST['wpsm_description'][$k],
+					'status'		=> $_POST['wpsm_yoyaku'][$k],
+					'url'			=> $_POST['wpsm_url'][$k]
+				), array('ID' => $_POST['wpsm_date_id'][$k]));
 			}
 		} else {//記事単位で追加
 			$wpdb->query("DELETE FROM ".WPSM_DB_TABLENAME." WHERE post_id = '".$opt['post_id']."'");
@@ -136,8 +111,7 @@ class wp_schedule_manager {
 	}
 	
 	function __construct() {
-		
-		//exit(dirname(__FILE__));
+		if (!defined('WPSM_DB_TABLENAME')) define('WPSM_DB_TABLENAME', 'wp_wpsm_cal');//table name
 	}
 }
 
