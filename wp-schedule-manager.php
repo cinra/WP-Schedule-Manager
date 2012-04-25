@@ -40,7 +40,7 @@ function admin_schedule_list() {
 		
 	} elseif ($_GET['date_id']) {//スケジュール編集
 		
-		print_r($_POST);
+		#print_r($_POST);
 		if (isset($_POST['wpsm_date_id'])) {
 			/*foreach ($_POST['wpsm_date_id'] as $k => $v) {
 				$wpsm->set(array('date_id' => $_POST['wpsm_date_id'][$k]));
