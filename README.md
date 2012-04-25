@@ -22,6 +22,8 @@ Wordpressで記事毎にスケジュールを管理するプラグイン。
 * term - 期間の長さ。'term'に合わせて、期間を指定できます。（デフォルト：1）
 * order_by - ソート対象（デフォルト：date）
 * order - ソート順。'ASC'|'DESC'（デフォルト：ASC）
+* post_type - 投稿タイプ
+* category - カテゴリ指定
 
 例：
 

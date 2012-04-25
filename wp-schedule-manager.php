@@ -9,7 +9,17 @@ Author URI: http://www.cinra.co.jp/
 License: not-yet
 */
 
-include(dirname(__FILE__).'/class.php');
+
+
+//const
+if (!defined('WPSM_PLUGIN_BASENAME'))	define('WPSM_PLUGIN_BASENAME', plugin_basename(__FILE__));
+if (!defined('WPSM_PLUGIN_NAME'))		define('WPSM_PLUGIN_NAME', trim(dirname(WPSM_PLUGIN_BASENAME),'/'));
+if (!defined('WPSM_PLUGIN_DIR'))		define('WPSM_PLUGIN_DIR', WP_PLUGIN_DIR.'/'.WPSM_PLUGIN_NAME);
+if (!defined('WPSM_PLUGIN_URL'))		define('WPSM_PLUGIN_URL', WP_PLUGIN_URL.'/'.WPSM_PLUGIN_NAME);
+if (!defined('WPSM_DB_TABLENAME'))		define('WPSM_DB_TABLENAME', 'wp_wpsm_cal');//table name
+
+include(WPSM_PLUGIN_DIR.'/class.php');
+$wpsm = new wp_schedule_manager();
 
 if (is_admin()) {
 	wp_enqueue_script('jquery');
@@ -22,10 +32,45 @@ add_action('save_post', array(&$wpsm, 'set'), 10);//インポート、記事・�
 add_action('publish_post', array(&$wpsm, 'set'), 10);//公開記事が編集された場合
 add_action('transition_post_status', array(&$wpsm, 'set'), 10);//記事が公開に変更された場合
 
+
+
 add_action('admin_menu', 'wpsm_add_sidemenu');
 function wpsm_add_sidemenu() {
 	add_menu_page('schedule', 'schedule', 7, 'wpsm', 'admin_schedule_list');
  	add_submenu_page('wpsm', 'schedule','編集', 7, 'edit', 'admin_schedule_list');
+ 	add_submenu_page('wpsm', 'schedule','設定', 7, 'option', 'admin_option');
+}
+
+function admin_option() {
+	
+	$options = array('wpsm_post_type');
+	
+	foreach($options as $opt) {
+		if (isset($_POST[$opt])) {
+			if (get_option($opt)) {
+				update_option($opt, $_POST[$opt]);
+			} else {
+				add_option($opt, $_POST[$opt]);
+			}
+		}
+	}
+	
+	global $wpsm;
+	echo '<div class="wrap"><h2>設定</h2>';
+?>
+
+<form method="POST">
+
+<p><label>投稿タイプ</label><br />
+<input type="text" name="wpsm_post_type" size="50" tabindex="1" id="wpsm_post_type" autocomplete="off" value="<?php echo get_option('wpsm_post_type')?>" /></p>
+
+<input type="submit" name="publish" id="publish" class="button-primary" value="<?php _e('保存')?>" tabindex="5" accesskey="p">
+
+</form>
+</div>
+
+<?php	
+
 }
 
 function admin_schedule_list() {
@@ -166,24 +211,6 @@ function get_monthly_pager($now, $next, $prev) {
 	echo $output;
 }
 
-if(defined('WP_PLUGIN_URL')) {
-	
-	$wpsm = new wp_schedule_manager();
-	
-	/*global $wpmp;
-
-	if(file_exists(dirname(__FILE__) . '/ext/' . get_locale() . '/class.php')) {
-		require_once(dirname(__FILE__) . '/ext/' . get_locale() . '/class.php');
-		$wpmp = new multibyte_patch_ext();
-	}
-	elseif(file_exists(dirname(__FILE__) . '/ext/default/class.php')) {
-		require_once(dirname(__FILE__) . '/ext/default/class.php');
-		$wpmp = new multibyte_patch_ext();
-	}
-	else
-		$wpmp = new multibyte_patch();*/
-}
-
 /* -----------------------------------------------------------
 
 		wpsm_output_metabox
@@ -192,7 +219,9 @@ if(defined('WP_PLUGIN_URL')) {
 ----------------------------------------------------------- */
 
 function wpsm_init_adminmenu() {
-	add_meta_box('schedule_manager', __('schedule'), 'wpsm_output_metabox', 'post', 'normal');
+	$opt = get_option('wpsm_post_type');
+	$post_type = (!empty($opt)) ? explode(',', $opt) : array('post');
+	foreach ($post_type as $pt) add_meta_box('schedule_manager', __('schedule'), 'wpsm_output_metabox', $pt, 'normal');
 }
 add_action('add_meta_boxes', 'wpsm_init_adminmenu');
 
@@ -310,4 +339,45 @@ a.wpsm_maenas:hover {cursor:pointer;}
 	$count++;
 	$c++;
 	endforeach;
-}?>
+}
+
+
+
+/* -----------------------------------------------------------
+
+		wpsm_install
+
+----------------------------------------------------------- */
+
+add_action('activate_' . WPSM_PLUGIN_BASENAME, 'wpsm_install');
+function wpsm_install() {
+	
+	global $wpdb;
+	
+	#if (wp_schedule_manager::table_exist(WPSM_DB_TABLENAME)) return;// テーブルが既にあるかどうかチェック
+	if (strtolower($wpdb->get_var( "SHOW TABLES LIKE '".WPSM_DB_TABLENAME."'")) == strtolower(WPSM_DB_TABLENAME)) return;
+	
+	$charset_collate = '';
+	if ($wpdb->has_cap('collation')) {
+		if (!empty( $wpdb->charset)) $charset_collate = "DEFAULT CHARACTER SET ".$wpdb->charset;
+		if (!empty( $wpdb->collate)) $charset_collate .= " COLLATE ".$wpdb->collate;
+	}
+	
+	$wpdb->query("CREATE TABLE IF NOT EXISTS `".WPSM_DB_TABLENAME."` (
+		`ID` BIGINT( 20 ) NOT NULL AUTO_INCREMENT ,
+		`date` DATE NOT NULL ,
+		`time` TIME NULL DEFAULT NULL ,
+		`description` TEXT NULL DEFAULT NULL ,
+		`post_id` BIGINT( 20 ) NOT NULL ,
+		`post_type` VARCHAR( 20 ) NOT NULL,
+		`status` TINYINT NOT NULL ,
+		`url` VARCHAR( 255 ) NULL DEFAULT NULL ,
+		INDEX ( `date`, `post_id`, `post_type`, `status` ),
+		PRIMARY KEY ( `ID` )
+		) ".$charset_collate.";");
+	
+	return (strtolower($wpdb->get_var( "SHOW TABLES LIKE '".WPSM_DB_TABLENAME."'")) == strtolower(WPSM_DB_TABLENAME)) ? true:false;
+}
+
+
+?>

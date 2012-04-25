@@ -10,6 +10,7 @@ class wp_schedule_manager {
 			'post_id'		=> false,
 			'include'		=> false,
 			'date'			=> false,
+			'post_type'		=> false,
 			'term_by'		=> 'day',
 			'term'			=> 1,
 			'order_by'		=> 'date',
@@ -38,6 +39,12 @@ class wp_schedule_manager {
 			}
 			$tmpsql .= ")";
 			$sql['where'][] = $tmpsql;
+		}
+		
+		// 投稿タイプでフィルター
+		if ($opt['post_type']) {
+			$post_type = explode(',', $opt['post_type']);
+			$sql['where'][] = implode(' OR `post_type` = ', $post_type);
 		}
 		
 		// 日付を処理
@@ -77,6 +84,8 @@ class wp_schedule_manager {
 		
 		global $wpdb;
 		
+		if (!isset($_POST['wpsm_date_id']) && !isset($_POST['wpsm_day'])) return;
+		
 		$opt = array(
 			'post_id'	=> get_the_ID()
 		);
@@ -101,7 +110,7 @@ class wp_schedule_manager {
 					'date'			=> $_POST['wpsm_day'][$k],
 					'time'			=> $_POST['wpsm_time'][$k],
 					'description'	=> $_POST['wpsm_description'][$k],
-					'description'	=> $_POST['wpsm_description'][$k],
+					'post_type'		=> $_POST['post_type'],
 					'status'		=> $_POST['wpsm_yoyaku'][$k],
 					'url'			=> $_POST['wpsm_url'][$k],
 					'post_id'		=> $opt['post_id']
@@ -111,7 +120,7 @@ class wp_schedule_manager {
 	}
 	
 	function __construct() {
-		if (!defined('WPSM_DB_TABLENAME')) define('WPSM_DB_TABLENAME', 'wp_wpsm_cal');//table name
+		
 	}
 }
 
