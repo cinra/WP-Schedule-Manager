@@ -10,6 +10,7 @@ class wp_schedule_manager {
 			'post_id'		=> false,
 			'include'		=> false,
 			'date'			=> false,
+			'group'			=> false,
 			'post_type'		=> false,
 			'term_by'		=> 'day',
 			'term'			=> 1,
@@ -44,7 +45,10 @@ class wp_schedule_manager {
 		// 投稿タイプでフィルター
 		if ($opt['post_type']) {
 			$post_type = explode(',', $opt['post_type']);
-			$sql['where'][] = implode(' OR `post_type` = ', $post_type);
+			$tmpsql = "(`post_type` = '";
+			$tmpsql .= implode("' OR `post_type` = '", $post_type);
+			$tmpsql .= "')";
+			$sql['where'][] = $tmpsql;
 		}
 		
 		// 日付を処理
@@ -63,6 +67,7 @@ class wp_schedule_manager {
 			$sql['where'][] = "(`date` >= '".$opt['date']."' AND `date` < '".$end_str."')";
 		}
 		
+		// 表示する記事を選択
 		if ($opt['include']) {
 			$inc = array();
 			$tmparr = array();
@@ -77,7 +82,11 @@ class wp_schedule_manager {
 		
 		$sql['str'] .= " ORDER BY `".$opt['order_by']."` ".$opt['order'];
 		
-		return $wpdb->get_results($sql['str']);
+		$dat = $wpdb->get_results($sql['str']);
+		
+		if (!$opt['group']) return $dat;
+		
+		return $this->grouping($opt['group'], $dat);//グルーピング
 	}
 	
 	public function set($usr_opt = array()) {
@@ -117,6 +126,21 @@ class wp_schedule_manager {
 				));
 			}
 		}
+	}
+	
+	public function grouping($group = 'daily', $raw = array()) {
+		$dat = array();
+		if (!empty($raw) && is_array($raw)) {
+			switch ($group) {
+				case 'daily':
+				default:
+					foreach ($raw as $r) {
+						$dat[$r->date][] = $r;
+					}
+				break;
+			}
+		}
+		return $dat;
 	}
 	
 	function __construct() {

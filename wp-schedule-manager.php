@@ -364,7 +364,7 @@ function wpsm_install() {
 	}
 	
 	$wpdb->query("CREATE TABLE IF NOT EXISTS `".WPSM_DB_TABLENAME."` (
-		`ID` BIGINT( 20 ) NOT NULL AUTO_INCREMENT ,
+		`ID` BIGINT( 20 ) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		`date` DATE NOT NULL ,
 		`time` TIME NULL DEFAULT NULL ,
 		`description` TEXT NULL DEFAULT NULL ,
@@ -372,8 +372,7 @@ function wpsm_install() {
 		`post_type` VARCHAR( 20 ) NOT NULL,
 		`status` TINYINT NOT NULL ,
 		`url` VARCHAR( 255 ) NULL DEFAULT NULL ,
-		INDEX ( `date`, `post_id`, `post_type`, `status` ),
-		PRIMARY KEY ( `ID` )
+		INDEX ( `date`, `post_id`, `post_type`, `status` )
 		) ".$charset_collate.";");
 	
 	return (strtolower($wpdb->get_var( "SHOW TABLES LIKE '".WPSM_DB_TABLENAME."'")) == strtolower(WPSM_DB_TABLENAME)) ? true:false;
