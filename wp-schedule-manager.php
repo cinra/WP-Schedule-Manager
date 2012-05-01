@@ -260,6 +260,7 @@ a.wpsm_maenas:hover {cursor:pointer;}
 	var html =$('.wpsm_daybox0').html();
 	 	
 	$('.wpsm_plus').live('click', function() {
+	
 			wpsmaf="wpsm_daybox"+count;
 			//console.log(wpsmaf);
 			
@@ -272,26 +273,28 @@ a.wpsm_maenas:hover {cursor:pointer;}
 			
 			$(wpsmaf).after(wpsmadd);
 			$("."+wpsm).append(html);
-
+			
 			//console.log($("."+wpsm).children());
 			wpsm_day="wpsm_day[" + count + "]";
 			wpsm_time="wpsm_time[" + count + "]";
 			wspm_description="wspm_description[" + count + "]";
 			wpsm_yoyaku="wpsm_yoyaku[" + count + "]";
-			
+			wpsm_class="wpsm_class"+count;
 			wpsm_URL="wpsm_url[" + count + "]";
 			//$("."+wpsm).children(".day").children("input").attr("name",wpsm_day);
-			$("."+wpsm).children(".day").children("input").attr({name:wpsm_day,value:""});
+			$("."+wpsm).children(".day").children("input").attr({name:wpsm_day,value:"", id:wpsm_class});
+			$("."+wpsm).children(".day").children("input").attr({name:wpsm_day,value:"", class:""});
 			$("."+wpsm).children(".time").children("input").attr({name:wpsm_time,value:""});
 			$("."+wpsm).children(".description").children("input").attr({name:wspm_description,value:""});
 			$("."+wpsm).children(".yoyaku").children("input").attr({name:wpsm_yoyaku,value:0});
 			$("."+wpsm).children(".URL").children("input").attr({name:wpsm_URL,value:""});
 			$(".wpsm_maenas").css("display","inline");
-			
+						
+			$("#"+wpsm_class).datepicker({ dateFormat: 'yy-mm-dd' });
 			wpsmaf=wpsm;
 			wpsm="wpsm_daybox";
 			
-			$('.sc-data').datepicker('refresh');
+
 		});
 		$('.wpsm_maenas').live('click', function() {
 			console.log($(this).parent().parent());
@@ -306,14 +309,16 @@ a.wpsm_maenas:hover {cursor:pointer;}
 	});
 })(jQuery);
 </script>
+
 <?php
 	$c = 0;
 	foreach($dat as $d):
 	#print_r($d);
 ?>
+
+
 <div class="wpsm_daybox<?php echo $count ?> box">
 	<p class="day">
-		<label>日付</label>
 		<input type="text" name="wpsm_day[<?php echo $c?>]" size="50" tabindex="1" class="sc-data" autocomplete="off"<?php if(isset($d->date)):?> value="<?php echo $d->date?>"<?php endif;?> />
 	</p>
 	<p class="time">
