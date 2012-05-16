@@ -129,7 +129,78 @@ function admin_schedule_list() {
 <?php
 	endforeach;
 	endif;
-} else {
+}
+else if($_GET['mode']=='post'){
+global $wpdb;
+	?>
+	<script type="text/javascript">
+(function($) {
+	$(function() {
+    $('.sc-data').datepicker({ dateFormat: 'yy-mm-dd' });
+			});
+})(jQuery);
+</script>
+	<h2>スーパーポストペーじ</h2>
+	<h2><span style="color:red;"><?php echo $_GET['id']; ?></span></h2>
+	<div class="box">
+	<form method="post" enctype="multipart/form-data">
+
+	<p class="day">
+		<label>日付</label>
+		<input type="text" name="wpsm_day" size="50" tabindex="1" class="sc-data" autocomplete="off" value="" />
+	</p>
+	<p class="time">
+		<label>時間</label>
+		<input type="text" name="wpsm_time" size="50" tabindex="1" id="sc-time" autocomplete="off" value="" />
+	</p>
+	<p >
+		<label>概要</label>
+		<input type="text" name="wpsm_description" size="50" tabindex="1" id="sc-description" autocomplete="off" value="" />
+	</p>
+	<p class="yoyaku">
+		<label>予約可</label>
+		<input type="checkbox" name="wpsm_yoyaku"  />
+	</p>
+	<p class="URL">
+		<label>URL</label>
+		<input type="text" name="wpsm_url" size="100" tabindex="1" id="sc-URL" autocomplete="off" value="" />
+	</p>
+	<p>	
+		<input type="submit" name="submit" value="登録" />
+	</p>
+	</form>
+</div>
+
+<?php
+	if ($_POST['submit'] == '登録') {
+	echo "登録";
+
+	if($_POST['wpsm_yoyaku']=="on"){
+		$SCK =1;
+	}else{
+	$SCK =0;
+	}
+	//print_r($_POST);
+	$wpdb->insert('wp_wpsm_cal', array(
+						'date'		=> $_POST['wpsm_day'],								
+						'time'		=> $_POST['wpsm_time'],
+						'description' => $_POST['wpsm_description'],
+						'post_id'		=> $_GET['id'],
+						'status' => $SCK,
+						'url' => $_POST['wpsm_url']					
+	));
+
+	}
+get_list_table($wpsm->get(array(
+	 	'post_id'		=> $_GET['id'],
+	 	'term'		=> 1
+	)), $datestr); 
+	
+
+}
+
+
+ else {
 	$post = get_posts();
 	
 	$options = "";
@@ -167,10 +238,19 @@ if (empty($datestr)) $datestr = $_GET['date'];
 <table class="widefat">
 	<thead>
 		<tr>
-			<th scope="col" colspan="25"><?php echo $datestr?></th>
+			<th scope="col" colspan="25"><?php 
+											if($_GET['mode']=="post"){
+											echo '<a href="post.php?post='.$_GET['id'].'&action=edit"'.$post->ID.'">'.get_the_title($_GET['id']).'</a>';
+											}
+											else{	echo $datestr;
+											}
+											?></th>
 		</tr>
 		<tr>
-			<th scope="col" colspan="1">タイトル</th>
+		<?php if($_GET['mode']=="post"){}
+		else{?> <th scope="col" colspan="1">タイトル</th>
+			<?php } ?>
+
 			<th scope="col" colspan="1">日にち</th>
 			<th scope="col" colspan="1">時間</th>
 			<th scope="col" colspan="1">受付の有無</th>
@@ -186,7 +266,9 @@ if (!empty($dat)) {
 		$check = ($is_link) ? "有" : "無";
 		
 		echo	'<tr class="mainraw">';
-		echo    '<td><a href="post.php?post='.$post->ID.'&action=edit">'.$post->post_title.'</a></td>';
+		if($_GET['mode']=="post"){}
+		else {
+		echo    '<td><a href="admin.php?page=wpsm&mode=post&id='.$post->ID.'">'.$post->post_title.'</a></td>';}
 		echo    '<td><a href="admin.php?page=wpsm&date_id='.$d->ID.'">'.$d->date.'</a></td>';		
 		echo	'<td>'.$d->time.'</td>';
 		echo	'<td>'.$check.'</td>';
