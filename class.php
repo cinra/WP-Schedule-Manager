@@ -102,25 +102,25 @@ class wp_schedule_manager {
 		
 		if (!isset($opt['post_id'])){//日付ID単位で更新
 			foreach($_POST['wpsm_date_id'] as $k => $d){
-				if ($_POST['wpsm_yoyaku'][$k] == 'on') $_POST['wpsm_yoyaku'][$k] = true;
+				if ($_POST['wpsm_status'][$k] == 'on') $_POST['wpsm_status'][$k] = true;
 				$wpdb->update(WPSM_DB_TABLENAME, array(
 					'date'			=> $_POST['wpsm_day'][$k],
 					'time'			=> $_POST['wpsm_time'][$k],
 					'description'	=> $_POST['wpsm_description'][$k],
-					'status'		=> $_POST['wpsm_yoyaku'][$k],
+					'status'		=> $_POST['wpsm_status'][$k],
 					'url'			=> $_POST['wpsm_url'][$k]
 				), array('ID' => $_POST['wpsm_date_id'][$k]));
 			}
 		} else {//記事単位で追加
 			$wpdb->query("DELETE FROM ".WPSM_DB_TABLENAME." WHERE post_id = '".$opt['post_id']."'");
 			foreach($_POST['wpsm_day'] as $k => $d){
-				if ($_POST['wpsm_yoyaku'][$k] == 'on') $_POST['wpsm_yoyaku'][$k] = true;
+				if ($_POST['wpsm_status'][$k] == 'on') $_POST['wpsm_status'][$k] = true;
 				$wpdb->insert('wp_wpsm_cal', array(
 					'date'			=> $_POST['wpsm_day'][$k],
 					'time'			=> $_POST['wpsm_time'][$k],
 					'description'	=> $_POST['wpsm_description'][$k],
 					'post_type'		=> $_POST['post_type'],
-					'status'		=> $_POST['wpsm_yoyaku'][$k],
+					'status'		=> $_POST['wpsm_status'][$k],
 					'url'			=> $_POST['wpsm_url'][$k],
 					'post_id'		=> $opt['post_id']
 				));
