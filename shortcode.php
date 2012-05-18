@@ -5,7 +5,7 @@ function wpsm_shortcode($atts) {
 		'post_id'		=> false,
 		'include'		=> false,
 		'date'			=> false,
-		'group'			=> false,
+		'group'			=> 'daily',
 		'post_type'		=> false,
 		'term_by'		=> 'day',
 		'term'			=> 1,
@@ -20,28 +20,37 @@ function wpsm_shortcode($atts) {
 		$atts['post_id'] = $post->ID;
 	}
 	
+	$atts['group'] = 'daily';
+	
 	$date = $wpsm->get($atts);
 	
 	$output = "";
 	
-	$output .= '<div id="schedule-table">';
-	$output .= '<dl class="tbl_clearfix">';
+	$output .= '<table class="schedule-list">';
+	$output .= '<tr><th class="schedule-list-day">日程</th><th class="schedule-list-time">時間</th><th class="schedule-list-preserve">予約</th></tr>';
 	
-	foreach ($date as $k => $d) {
-		$weekday = strtolower(date('D', $d->date));
-		$p = get_post($d->post_id);
-		$output .= '<dt class="day week-'.$weekday.'" rel="day-'.$k.'">';
-		$output .= date('n月j日', strtotime($d->date)).'（'. wp_get_weekday($d->date).'）</dt>';
-		$output .= '<dd class="day-'.$k.' week-'.$weekday.'" rel="day-'.$k.'">';
-			$output .= '<dl class="item">';
-				$output .= '<dt>'.$d->time.'</dt>';
-				$output .= '<dd>'.$d->description.'</dd>';
-			$output .= '</dl>';
-		$output .= '</dd>';
+	#$output .= '<tr>';
+	
+	foreach ($date as $day => $d) {
+		$weekday = strtolower(date('D', $day));
+		$output .= '<tr>';
+		$output .= '<td class="day-head" rowspan="'.count($day).'">'.date('n月j日', strtotime($day)).'（'. wp_get_weekday($day).'）</td>';
+		
+		foreach($d as $i => $dd) {
+			if ($i != 0) $output .= '<tr>';
+			$output .= '<td>'.$dd->time.'</td>';
+			$output .= '<td>';
+			if ($dd->status && !empty($dd->url)) $output .= '<a href="'.$dd->url.'" target="_blank" class="btn_preservation">予約する</a>';
+			$output .= '</td>';
+			if ($i != 0) $output .= '</tr>';
+		}
+		
+		$output .= '</td>';
+		$output .= '</tr>';
 	}
 	
-	$output .= "</dl>";
-	$output .= '</div>';
+	#$output .= "</tr>";
+	$output .= '</table>';
 	
 	return $output;
 }
