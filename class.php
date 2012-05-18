@@ -103,13 +103,17 @@ class wp_schedule_manager {
 		if (!isset($opt['post_id'])){//日付ID単位で更新
 			foreach($_POST['wpsm_date_id'] as $k => $d){
 				if ($_POST['wpsm_status'][$k] == 'on') $_POST['wpsm_status'][$k] = true;
-				$wpdb->update(WPSM_DB_TABLENAME, array(
-					'date'			=> $_POST['wpsm_day'][$k],
-					'time'			=> $_POST['wpsm_time'][$k],
-					'description'	=> $_POST['wpsm_description'][$k],
-					'status'		=> $_POST['wpsm_status'][$k],
-					'url'			=> $_POST['wpsm_url'][$k]
-				), array('ID' => $_POST['wpsm_date_id'][$k]));
+				if (empty($_POST['wpsm_day'][$k])) {//日付が未入力の場合
+					$wpdb->query("DELETE FROM ".WPSM_DB_TABLENAME." WHERE ID = '".$_POST['wpsm_date_id'][$k]."'");
+				} else {
+					$wpdb->update(WPSM_DB_TABLENAME, array(
+						'date'			=> $_POST['wpsm_day'][$k],
+						'time'			=> $_POST['wpsm_time'][$k],
+						'description'	=> $_POST['wpsm_description'][$k],
+						'status'		=> $_POST['wpsm_status'][$k],
+						'url'			=> $_POST['wpsm_url'][$k]
+					), array('ID' => $_POST['wpsm_date_id'][$k]));
+				}
 			}
 		} else {//記事単位で追加
 			$wpdb->query("DELETE FROM ".WPSM_DB_TABLENAME." WHERE post_id = '".$opt['post_id']."'");

@@ -64,8 +64,8 @@ add_action('transition_post_status', array(&$wpsm, 'set'), 10);//記事が公開
 
 add_action('admin_menu', 'wpsm_add_sidemenu');
 function wpsm_add_sidemenu() {
-	add_menu_page('schedule', 'schedule', 7, 'wpsm', 'admin_schedule_list');
- 	add_submenu_page('wpsm', 'schedule','編集', 7, 'edit', 'admin_schedule_list');
+	add_menu_page('schedule', 'スケジュール', 7, 'wpsm', 'admin_schedule_list');
+ 	//add_submenu_page('wpsm', 'schedule','編集', 7, 'edit', 'admin_schedule_list');
  	add_submenu_page('wpsm', 'schedule','設定', 7, 'option', 'admin_option');
 }
 
@@ -104,7 +104,7 @@ function admin_option() {
 
 /* ----------------------------------------------------------
 	
-	print schedule list
+	Generate Schedule List
 	
 ---------------------------------------------------------- */
 
@@ -122,15 +122,15 @@ function admin_schedule_list() {
 		$dat = $wpsm->get(array(
 			'include'	=> explode(',', $_GET['date_id'])
 		));
+		if (!empty($dat)) :
 ?>
 
 <form method="POST">
 
 <?php //ここから、全て外部関数に置き換え?>
 <?php
-	if (!empty($dat)) :
 	foreach($dat as $d):
-	$post =get_post($d->post_id);
+	$post = get_post($d->post_id);
 ?>
 
 <h2><?php echo $post->post_title?></h2>
@@ -156,7 +156,7 @@ function admin_schedule_list() {
 	</p>
 	<p class="status">
 		<label>予約可</label>
-		<input type="checkbox" name="wpsm_status[0]"<?php if(isset($d->status)):?> value="<?php echo $d->status?>"<?php endif;?> />
+		<input type="checkbox" name="wpsm_status[0]"<?php if(isset($d->status) && $d->status == 1):?> checked="checked"<?php endif;?> />
 	</p>
 	<p class="URL">
 		<label>URL</label>
@@ -167,10 +167,23 @@ function admin_schedule_list() {
 	<input type="submit" name="publish" id="publish" class="button-primary" value="<?php _e('更新')?>" tabindex="5" accesskey="p">
 </form>
 
+<form method="POST" style="padding:20px 0 0 0;border-top:1px solid #CCC;margin:20px 0 0 0;text-align:right;">
+	<input type="hidden" name="wpsm_date_id[0]"<?php if(isset($d->ID)):?> value="<?php echo $d->ID?>"<?php endif;?> />
+	<input type="hidden" name="wpsm_refresh_post_id[0]"<?php if(isset($post)):?> value="<?php echo $post->ID?>"<?php endif;?> />
+	<input type="hidden" name="wpsm_day[0]" value="" />
+	<input type="submit" name="publish" id="publish" class="button-secondary" value="<?php _e('削除')?>" tabindex="5" accesskey="p">
+</form>
+
 <?php
 	endforeach;
+	else:
+	#echo '<pre>';
+	#print_r($_POST);
+	#ho '</pre>';exit;
+	echo '<meta http-equiv="refresh" content="0;URL='.admin_url().'admin.php?page=wpsm&mode=post&id='.$_POST['wpsm_refresh_post_id'][0].'" />';
+	//header('location:'.admin_url().'admin.php?page=wpsm');
 	endif;
-} else if($_GET['mode']=='post') {
+} elseif ($_GET['mode']=='post') {
 	global $wpdb;
 ?>
 <script type="text/javascript">
@@ -185,23 +198,19 @@ function admin_schedule_list() {
 	<form method="post" enctype="multipart/form-data">
 	<p class="day">
 		<label>日付</label>
-		<input type="text" name="wpsm_day" size="50" tabindex="1" class="sc-data" autocomplete="off"<?php if(isset($_POST['wpsm_day'])):?> value="<?php echo $_POST['wpsm_day']?>"<?php endif;?> />
-	</p>
-	<p class="time">
+		<input type="text" name="wpsm_day" size="20" tabindex="1" class="sc-data" autocomplete="off"<?php if(isset($_POST['wpsm_day'])):?> value="<?php echo $_POST['wpsm_day']?>"<?php endif;?> />
 		<label>時間</label>
-		<input type="text" name="wpsm_time" size="50" tabindex="1" id="sc-time" autocomplete="off"<?php if(isset($_POST['wpsm_time'])):?> value="<?php echo $_POST['wpsm_time']?>"<?php endif;?> />
+		<input type="text" name="wpsm_time" size="20" tabindex="1" id="sc-time" autocomplete="off"<?php if(isset($_POST['wpsm_time'])):?> value="<?php echo $_POST['wpsm_time']?>"<?php endif;?> />
 	</p>
 	<p>
-		<label>概要</label>
-		<input type="text" name="wpsm_description" size="50" tabindex="1" id="sc-description" autocomplete="off"<?php if(isset($_POST['wpsm_description'])):?> value="<?php echo $_POST['wpsm_description']?>"<?php endif;?> />
+		<label style="vertical-align:top">概要</label>
+		<textarea name="wpsm_description" cols="50" rows="4" class="sc-description"><?php if(isset($_POST['wpsm_description'])):?><?php echo $_POST['wpsm_description']?><?php endif;?></textarea>
 	</p>
 	<p class="status">
-		<label>予約可</label>
-		<input type="checkbox" name="wpsm_status" />
-	</p>
-	<p class="URL">
+		<label>公開状態</label>
+		<input type="checkbox" name="wpsm_status"<?php if(isset($d->status) && $d->status == 1):?> checked="checked"<?php endif;?> />
 		<label>URL</label>
-		<input type="text" name="wpsm_url" size="100" tabindex="1" id="sc-URL" autocomplete="off"<?php if(isset($_POST['wpsm_url'])):?> value="<?php echo $_POST['wpsm_url']?>"<?php endif;?> />
+		<input type="text" name="wpsm_url" size="40" tabindex="1" class="sc-url" autocomplete="off"<?php if(isset($_POST['wpsm_url'])):?> value="<?php echo $_POST['wpsm_url']?>"<?php endif;?> />
 	</p>
 	<p>
 		<input type="submit" name="submit" value="登録" />
@@ -244,19 +253,20 @@ function admin_schedule_list() {
 	
 	$next = date('Y-m-d', mktime(0, 0, 0, $date_a[1]+1, $date_a[2], $date_a[0]));
 	$prev = date('Y-m-d', mktime(0, 0, 0, $date_a[1]-1, $date_a[2], $date_a[0]));
+	$datestr_last = date('Y-m-d', mktime(0, 0, 0, $date_a[1]+1, $date_a[2]-1, $date_a[0]));
 	
 	get_monthly_pager($now, $next, $prev);
 	get_list_table($wpsm->get(array(
 	 	'date'		=> $datestr,
 	 	'term_by'	=> 'month',
 	 	'term'		=> 1
-	)), $datestr);
+	)), $datestr, $datestr_last);
 	get_monthly_pager($now, $next, $prev);
 }
 echo '</div>';
 }
 
-function get_list_table($dat = array(), $datestr = "") {
+function get_list_table($dat = array(), $datestr = "", $datelast = "") {
 if (empty($datestr)) $datestr = $_GET['date'];
 ?>
 
@@ -264,14 +274,14 @@ if (empty($datestr)) $datestr = $_GET['date'];
 <table class="widefat">
 	<thead>
 		<?php if($_GET['mode']!="post"):?><tr>
-			<th scope="col" colspan="25"><?php echo $datestr?></th>
+			<th scope="col" colspan="25"><?php echo $datestr?><?php if($datelast):?> 〜 <?php echo $datelast?><?php endif;?></th>
 		</tr><?php endif;?>
 		<tr>
 		<?php if($_GET['mode'] != "post") {?> <th scope="col" colspan="1">タイトル</th><?php } ?>
-			<th scope="col" colspan="1">日にち</th>
+			<th scope="col" colspan="1">日付</th>
 			<th scope="col" colspan="1">時間</th>
-			<th scope="col" colspan="1">受付の有無</th>
-			<th scope="col" colspan="1">受付URL</th>
+			<th scope="col" colspan="1">公開状態</th>
+			<th scope="col" colspan="1">URL</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -280,7 +290,7 @@ if (!empty($dat)) {
 	foreach ($dat as $d) {
 		$post = get_post($d->post_id);
 		$is_link = $d->status;
-		$check = ($is_link) ? "有" : "無";
+		$check = ($is_link) ? '<img src="'.admin_url().'images/yes.png" />' : " -";
 		
 		echo	'<tr class="mainraw">';
 		if($_GET['mode']=="post"){}
@@ -373,7 +383,7 @@ function wpsm_output_metabox() {
 			
 			obj.find("input.sc-data").attr({name:wpsm_day,value:parent.find("input.sc-data").val(), id:wpsm_class, class:""});
 			obj.find("input.sc-time").attr({name:wpsm_time,value:parent.find("input.sc-time").val()});
-			obj.find("textarea.sc-description").attr({name:wspm_description,value:parent.find("input.sc-description").val()});
+			obj.find("textarea.sc-description").attr({name:wspm_description,value:parent.find("textarea.sc-description").val()});
 			obj.find(".status input").attr({name:wpsm_status,value:0});
 			obj.find("input.sc-url").attr({name:wpsm_URL,value:parent.find("input.sc-url").val()});
 			
