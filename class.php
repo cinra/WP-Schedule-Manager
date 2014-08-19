@@ -1,11 +1,11 @@
 <?php
 
 class wp_schedule_manager {
-	
+
 	public function get($usr_opt = array()) {
-		
+
 		global $wpdb;
-		
+
 		$opt = array(
 			'post_id'		=> false,
 			'include'		=> false,
@@ -18,9 +18,9 @@ class wp_schedule_manager {
 			'order'			=> 'asc'
 		);
 		$opt = array_merge($opt, $usr_opt);
-		
+
 		$sql = array();
-		
+
 		if ($opt['post_id']) {// 記事ID
 			$sql['where'][] = "`post_id` = '".$opt['post_id']."'";
 		} else if ($opt['category']) {// カテゴリフィルター
@@ -43,7 +43,7 @@ class wp_schedule_manager {
 			$tmpsql .= ")";
 			$sql['where'][] = $tmpsql;
 		}
-		
+
 		// 投稿タイプでフィルター
 		if ($opt['post_type']) {
 			$post_type = explode(',', $opt['post_type']);
@@ -52,23 +52,23 @@ class wp_schedule_manager {
 			$tmpsql .= "')";
 			$sql['where'][] = $tmpsql;
 		}
-		
+
 		// 日付を処理
 		if ($opt['date']) {
 			$opt['date'] = strtotime($opt['date']);
 			$opt['date'] = date('Y-m-d', $opt['date']);
-			
+
 			$date_end = explode('-', $opt['date']);
 			if ($opt['term_by'] == 'year')	$date_end[0] = (int)$date_end[0] + $opt['term'];
 			if ($opt['term_by'] == 'month')	$date_end[1] = (int)$date_end[1] + $opt['term'];
 			if ($opt['term_by'] == 'day')		$date_end[2] = (int)$date_end[2] + $opt['term'];
 			if ($opt['term_by'] == 'week')	$date_end[2] = (int)$date_end[2] + ($opt['term']*7);
-			
+
 			$end_str = date('Y-m-d', mktime(0, 0, 0, $date_end[1], $date_end[2], $date_end[0]));
-			
+
 			$sql['where'][] = "(`date` >= '".$opt['date']."' AND `date` < '".$end_str."')";
 		}
-		
+
 		// 表示する記事を選択
 		if ($opt['include']) {
 			$inc = array();
@@ -77,7 +77,7 @@ class wp_schedule_manager {
 			foreach ($inc as $i) $tmparr[] = "wp_wpsm_cal.`ID` = ".$i;
 			$sql['where'][] = implode(' OR ', $tmparr);
 		}
-		
+
 		// SQL作成
 		if (empty($sql['str'])) {
 			$sql['where'][] = "(wp_posts.`post_status` = 'publish')";
@@ -85,28 +85,28 @@ class wp_schedule_manager {
 			$sql['str'] .= " INNER JOIN wp_posts ON wp_wpsm_cal.post_id = wp_posts.ID";
 		}
 		if (!empty($sql['where'])) $sql['str'] .= " WHERE ".implode(' AND ', $sql['where']);
-		
+
 		$sql['str'] .= " ORDER BY `".$opt['order_by']."` ".$opt['order'];
-		
+
 		$dat = $wpdb->get_results($sql['str']);
 		#echo $wpdb->last_query;
-		
+
 		if (!$opt['group']) return $dat;
-		
+
 		return $this->grouping($opt['group'], $dat);//グルーピング
 	}
-	
+
 	public function set($usr_opt = array()) {
-		
+
 		global $wpdb;
-		
+
 		if (!isset($_POST['wpsm_date_id']) && !isset($_POST['wpsm_day'])) return;
-		
+
 		$opt = array(
 			'post_id'	=> get_the_ID()
 		);
 		if (is_array($usr_opt)) $opt = array_merge($opt, $usr_opt);
-		
+
 		if (!isset($opt['post_id']) && $_POST['wpsm_date_id']){//日付ID単位で更新
 			foreach($_POST['wpsm_date_id'] as $k => $d){
 				if (empty($_POST['wpsm_day'][$k])) {//日付が未入力の場合
@@ -117,6 +117,7 @@ class wp_schedule_manager {
 						'time'			=> $_POST['wpsm_time'][$k],
 						'description'	=> "",
 						'status'			=> $_POST['wpsm_status'][$k],
+						'ticket'			=> $_POST['wpsm_ticket'][$k],
 						'url'			=> $_POST['wpsm_url'][$k]
 					), array('ID' => $_POST['wpsm_date_id'][$k]));
 				}
@@ -130,14 +131,15 @@ class wp_schedule_manager {
 					'description'	=> "",
 					'post_type'		=> $_POST['post_type'],
 					'status'			=> $_POST['wpsm_status'][$k],
+					'ticket'			=> $_POST['wpsm_ticket'][$k],
 					'url'				=> $_POST['wpsm_url'][$k],
 					'post_id'		=> $opt['post_id']
 				));
 			}
 		}
-		
+
 	}
-	
+
 	public function grouping($group = 'daily', $raw = array()) {
 		$dat = array();
 		if (!empty($raw) && is_array($raw)) {
@@ -152,18 +154,18 @@ class wp_schedule_manager {
 						foreach ($s as $k => $d) {//記事毎（$k:記事ID）
 							foreach($d as $kk => $dd) {$arr[$kk] = $dd->time;}//時間順にソート
 							asort($arr);
-							
+
 							foreach ($arr as $ak => $a) {
 								if (!$not_first) $sorter[$k] = $a;
 								$dat_tmp[$k][] = $d[$ak];
 								$not_first = true;
 							}
-							
+
 							unset($arr);
 							$not_first = false;
 						}
 						asort($sorter);
-						
+
 						foreach($sorter as $sk => $sv) {
 							//foreach ($dat_tmp[$k] as $dddd) $arr2[] = $dddd;
 							$dat[$n][$sk] = $dat_tmp[$sk];
@@ -171,11 +173,11 @@ class wp_schedule_manager {
 						unset($arr2);
 						unset($sorter);
 						unset($dat_tmp);
-						
+
 						$not_first = false;
 					}
 				break;
-				
+
 				case 'daily':
 				default:
 					foreach ($raw as $r) {
@@ -183,10 +185,10 @@ class wp_schedule_manager {
 					}
 					$arr = array();
 					foreach ($dat_not_sorted as $k => $d) {
-						
+
 						foreach($d as $kk => $dd) {$arr[$kk] = $dd->time;}
 						asort($arr);
-						
+
 						foreach ($arr as $ak => $a) $dat[$k][] = $d[$ak];
 						unset($arr);
 					}
@@ -195,9 +197,9 @@ class wp_schedule_manager {
 		}
 		return $dat;
 	}
-	
+
 	function __construct() {
-		
+
 	}
 }
 

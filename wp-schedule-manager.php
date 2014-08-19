@@ -10,9 +10,9 @@ License: not-yet
 */
 
 /* ----------------------------------------------------------
-	
+
 	Initialize
-	
+
 ---------------------------------------------------------- */
 
 if (!defined('WPSM_PLUGIN_BASENAME'))	define('WPSM_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -21,23 +21,24 @@ if (!defined('WPSM_PLUGIN_DIR'))			define('WPSM_PLUGIN_DIR', WP_PLUGIN_DIR.'/'.W
 if (!defined('WPSM_PLUGIN_URL'))			define('WPSM_PLUGIN_URL', WP_PLUGIN_URL.'/'.WPSM_PLUGIN_NAME);
 if (!defined('WPSM_DB_TABLENAME'))		define('WPSM_DB_TABLENAME', 'wp_wpsm_cal');//table name
 
-$is_link = array(0 => '予約を受け付けない', 1 => 'メールフォームで予約を受け付ける', 2 => '別サイトで予約を受け付ける', 3 => '予約受付終了');
+$is_link = array(0 => '予約を受け付けない', 1 => 'メールフォームで予約を受け付ける', 2 => '別サイトで予約を受け付ける', 3 => '予約受付終了', 4 => '別サイトで購入を受け付ける',);
+$is_seat = array(0 => '当日券あり', 1 => '当日券なし', 2 => '満席', 3 => '表示なし',);
 
 require_once(WPSM_PLUGIN_DIR.'/class.php');
 require_once(WPSM_PLUGIN_DIR.'/shortcode.php');
 
 /* ----------------------------------------------------------
-	
+
 	Instance
-	
+
 ---------------------------------------------------------- */
 
 $wpsm = new wp_schedule_manager();
 
 /* ----------------------------------------------------------
-	
+
 	Javascript
-	
+
 ---------------------------------------------------------- */
 
 if (is_admin()) {
@@ -48,9 +49,9 @@ if (is_admin()) {
 }
 
 /* ----------------------------------------------------------
-	
+
 	Action Hooks
-	
+
 ---------------------------------------------------------- */
 
 add_action('edit_post', array(&$wpsm, 'set'), 10);//投稿記事またはページが更新・編集された場合（コメント含む）
@@ -59,9 +60,9 @@ add_action('publish_post', array(&$wpsm, 'set'), 10);//公開記事が編集さ�
 add_action('transition_post_status', array(&$wpsm, 'set'), 10);//記事が公開に変更された場合
 
 /* ----------------------------------------------------------
-	
+
 	Admin Menu
-	
+
 ---------------------------------------------------------- */
 
 add_action('admin_menu', 'wpsm_add_sidemenu');
@@ -71,9 +72,9 @@ function wpsm_add_sidemenu() {
 }
 
 /* ----------------------------------------------------------
-	
+
 	Utilities
-	
+
 ---------------------------------------------------------- */
 
 function wp_get_weekday($date) {
@@ -103,18 +104,18 @@ function get_postid_from_date($date_id) {
 
 add_action('activate_' . WPSM_PLUGIN_BASENAME, 'wpsm_install');
 function wpsm_install() {
-	
+
 	global $wpdb;
-	
+
 	#if (wp_schedule_manager::table_exist(WPSM_DB_TABLENAME)) return;// テーブルが既にあるかどうかチェック
 	if (strtolower($wpdb->get_var( "SHOW TABLES LIKE '".WPSM_DB_TABLENAME."'")) == strtolower(WPSM_DB_TABLENAME)) return;
-	
+
 	$charset_collate = '';
 	if ($wpdb->has_cap('collation')) {
 		if (!empty( $wpdb->charset)) $charset_collate = "DEFAULT CHARACTER SET ".$wpdb->charset;
 		if (!empty( $wpdb->collate)) $charset_collate .= " COLLATE ".$wpdb->collate;
 	}
-	
+
 	$wpdb->query("CREATE TABLE IF NOT EXISTS `".WPSM_DB_TABLENAME."` (
 		`ID` BIGINT( 20 ) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		`date` DATE NOT NULL ,
@@ -126,20 +127,20 @@ function wpsm_install() {
 		`url` VARCHAR( 255 ) NULL DEFAULT NULL ,
 		INDEX ( `date`, `post_id`, `post_type`, `status` )
 		) ".$charset_collate.";");
-	
+
 	return (strtolower($wpdb->get_var( "SHOW TABLES LIKE '".WPSM_DB_TABLENAME."'")) == strtolower(WPSM_DB_TABLENAME)) ? true:false;
 }
 
 /* ----------------------------------------------------------
-	
+
 	Set Option Value
-	
+
 ---------------------------------------------------------- */
 
 function admin_option() {
-	
+
 	$options = array('wpsm_post_type');
-	
+
 	foreach($options as $opt) {
 		if (isset($_POST[$opt])) {
 			if (get_option($opt)) {
@@ -149,7 +150,7 @@ function admin_option() {
 			}
 		}
 	}
-	
+
 	global $wpsm;
 	echo '<div class="wrap"><h2>設定</h2>';
 ?>
@@ -164,39 +165,39 @@ function admin_option() {
 <?php	}
 
 /* ----------------------------------------------------------
-	
+
 	Generate Schedule List
-	
+
 ---------------------------------------------------------- */
 
 function admin_schedule_list() {
-	
+
 	global $wpdb, $wpsm;
-	
+
 	echo '<div class="wrap">';
-	
+
 	switch ($_GET['mode']) {
 		// 記事別スケジュールカレンダー＋フォーム
 		case 'post':
-		
+
 		$wpsm->set(array(
 		 	'post_id'	=> $_GET['id'],
 		 	'add'			=> true
 		));
-		
+
 		echo '<div id="icon-options-general" class="icon32"></div>';
 		wpsm_view_post($_GET['id']);
 		wpsm_view_calendar(array(
 		 	'post_id'		=> $_GET['id']
 		));
 		break;
-		
+
 		// 日付編集画面
 		case 'date':
-		
+
 		$post_id = get_postid_from_date($_GET['id']);
 		$wpsm->set();
-		
+
 		if (!isset($_POST['wpsm_day'])) {
 			echo '<div id="icon-options-general" class="icon32"></div>';
 			echo '<h2><a href="?page=wpsm&mode=post&id='.$post_id.'">'.get_the_title($post_id).'</a></h2>';
@@ -210,16 +211,16 @@ function admin_schedule_list() {
 			));
 		}
 		break;
-		
+
 		// 月別スケジュールカレンダー
 		default:
 		echo '<div id="icon-options-general" class="icon32"></div>';
 		echo "<h2>スケジュール</h2>";
-		
+
 		$now		= date('Y-m-01');
 		$datestr	= ($_GET['date']) ? date('Y-m-d', strtotime($_GET['date'])) : $now;
 		$date_a	= explode('-', $datestr);
-		
+
 		wpsm_view_calendar(array(
 		 	'date'		=> $datestr,
 		 	'term_by'	=> 'month',
@@ -232,14 +233,14 @@ function admin_schedule_list() {
 		));
 		break;
 	}
-	
+
 	echo '</div>';
 }
 
 /* ----------------------------------------------------------
-	
+
 	View Post
-	
+
 ---------------------------------------------------------- */
 
 function wpsm_view_post($post_id) {
@@ -272,6 +273,8 @@ the_post();
 		<label>予約を受け付けない</label>
 		<input type="radio" name="wpsm_status[0]" value="1"<?php if(isset($_POST['wpsm_status'][0]) && $_POST['wpsm_status'][0] == 1):?> checked="checked"<?php endif;?> />
 		<label>メールフォームで予約を受け付ける</label>
+		<input type="radio" name="wpsm_status[0]" value="4"<?php if(isset($_POST['wpsm_status'][0]) && $_POST['wpsm_status'][0] == 4):?> checked="checked"<?php endif;?> />
+		<label>別サイトで購入を受け付ける</label>
 		<input type="radio" name="wpsm_status[0]" value="2"<?php if(isset($_POST['wpsm_status'][0]) && $_POST['wpsm_status'][0] == 2):?> checked="checked"<?php endif;?> />
 		<label>別サイトで予約を受け付ける</label>
 		<input type="radio" name="wpsm_status[0]" value="3"<?php if(isset($_POST['wpsm_status'][0]) && $_POST['wpsm_status'][0] == 3):?> checked="checked"<?php endif;?> />
@@ -280,6 +283,16 @@ the_post();
 	<p class="url">
 		<label>URL</label>
 		<input type="text" name="wpsm_url[0]" size="40" tabindex="1" class="sc-url" autocomplete="off"<?php if(isset($_POST['wpsm_url'][0])):?> value="<?php echo $_POST['wpsm_url'][0]?>"<?php endif;?> />
+	</p>
+	<p class="ticket">
+		<input type="radio" name="wpsm_ticket[0]" value="0"<?php if((isset($_POST['wpsm_ticket'][0]) && $_POST['wpsm_ticket'][0] == 0) || !isset($_POST['wpsm_ticket'][0])):?> checked="checked"<?php endif;?> />
+		<label>当日券あり</label>
+		<input type="radio" name="wpsm_ticket[0]" value="1"<?php if(isset($_POST['wpsm_ticket'][0]) && $_POST['wpsm_ticket'][0] == 1):?> checked="checked"<?php endif;?> />
+		<label>当日券なし</label>
+		<input type="radio" name="wpsm_ticket[0]" value="2"<?php if(isset($_POST['wpsm_ticket'][0]) && $_POST['wpsm_ticket'][0] == 2):?> checked="checked"<?php endif;?> />
+		<label>満席</label>
+		<input type="radio" name="wpsm_ticket[0]" value="3"<?php if(isset($_POST['wpsm_ticket'][0]) && $_POST['wpsm_ticket'][0] == 3):?> checked="checked"<?php endif;?> />
+		<label>表示なし</label>
 	</p>
 	<p>
 		<input type="submit" name="publish" id="publish" class="button-primary" value="<?php _e('追加登録')?>" tabindex="5" accesskey="p">
@@ -291,15 +304,15 @@ the_post();
 }
 
 /* ----------------------------------------------------------
-	
+
 	View Date
-	
+
 ---------------------------------------------------------- */
 
 function wpsm_view_date($date_id) {
 	global $wpsm;
 	$dat = $wpsm->get(array('include' => explode(',', $date_id)));
-	
+
 	foreach ($dat as $d):
 ?>
 
@@ -325,6 +338,8 @@ function wpsm_view_date($date_id) {
 		<label>予約を受け付けない</label>
 		<input type="radio" name="wpsm_status[0]" value="1"<?php if(isset($d->status) && $d->status == 1):?> checked="checked"<?php endif;?> />
 		<label>メールフォームで予約を受け付ける</label>
+		<input type="radio" name="wpsm_status[0]" value="4"<?php if(isset($d->status) && $d->status == 4):?> checked="checked"<?php endif;?> />
+		<label>別サイトで購入を受け付ける</label>
 		<input type="radio" name="wpsm_status[0]" value="2"<?php if(isset($d->status) && $d->status == 2):?> checked="checked"<?php endif;?> />
 		<label>別サイトで予約を受け付ける</label>
 		<input type="radio" name="wpsm_status[0]" value="3"<?php if(isset($d->status) && $d->status == 3):?> checked="checked"<?php endif;?> />
@@ -334,7 +349,17 @@ function wpsm_view_date($date_id) {
 		<label>URL</label>
 		<input type="text" name="wpsm_url[0]" size="50" tabindex="1" id="sc-URL" autocomplete="off"<?php if(isset($d->url)):?> value="<?php echo $d->url?>"<?php endif;?> />
 	</p>
-	
+	<p class="ticket">
+		<input type="radio" name="wpsm_ticket[0]" value="0"<?php if(isset($d->ticket) && $d->ticket == 0):?> checked="checked"<?php endif;?> />
+		<label>当日券あり</label>
+		<input type="radio" name="wpsm_ticket[0]" value="1"<?php if(isset($d->ticket) && $d->ticket == 1):?> checked="checked"<?php endif;?> />
+		<label>当日券なし</label>
+		<input type="radio" name="wpsm_ticket[0]" value="2"<?php if(isset($d->ticket) && $d->ticket == 2):?> checked="checked"<?php endif;?> />
+		<label>満席</label>
+		<input type="radio" name="wpsm_ticket[0]" value="3"<?php if(isset($d->ticket) && $d->ticket == 3):?> checked="checked"<?php endif;?> />
+		<label>表示なし</label>
+	</p>
+
 	<input type="submit" name="publish" id="publish" class="button-primary" value="<?php _e('更新')?>" tabindex="5" accesskey="p">
 </form>
 
@@ -352,21 +377,21 @@ endforeach;
 
 
 /* ----------------------------------------------------------
-	
+
 	Generate Schedule Calendar
-	
+
 ---------------------------------------------------------- */
 
 function wpsm_view_calendar($user_opt = array()) {
-	global $wpsm, $is_link;
-	
+	global $wpsm, $is_link, $is_seat;
+
 	$opt = array_merge(array(
 		'pager' => false,
 		'mode'	=> $_GET['mode']
 	), $user_opt);
-	
+
 	$dat = $wpsm->get($opt);
-	
+
 	if ($opt['pager']) get_monthly_pager($opt['now'], $opt['next'], $opt['prev']);
 ?>
 
@@ -381,23 +406,25 @@ function wpsm_view_calendar($user_opt = array()) {
 			<th scope="col" colspan="1">日付</th>
 			<th scope="col" colspan="1">時間／概要</th>
 			<th scope="col" colspan="1">予約状態</th>
+			<th scope="col" colspan="1">当日券</th>
 			<th scope="col" colspan="1">URL</th>
 		</tr>
 	</thead>
 	<tbody>
-<?php	 
+<?php
 if (!empty($dat)) {
 	foreach ($dat as $d) {
 		$post = get_post($d->post_id);
 		//$check = ($is_link) ? '<img src="'.admin_url().'images/yes.png" />' : " -";
-		
+
 		echo	'<tr class="mainraw">';
 		if($opt['mode']=="post"){}
 		else {
 		echo  '<td><a href="admin.php?page=wpsm&mode=post&id='.$post->ID.'">'.$post->post_title.'</a></td>';}
-		echo  '<td><a href="admin.php?page=wpsm&mode=date&id='.$d->date_id.'">'.$d->date.'</a></td>';		
+		echo  '<td><a href="admin.php?page=wpsm&mode=date&id='.$d->date_id.'">'.$d->date.'</a></td>';
 		echo	'<td>'.$d->time.'</td>';
 		echo	'<td>'.$is_link[$d->status].'</td>';
+		echo	'<td>'.$is_seat[$d->ticket].'</td>';
 		echo	'<td>'.$d->url.'</td>';
 		echo	'</tr>';
 	}
@@ -427,9 +454,9 @@ add_action('add_meta_boxes', 'wpsm_init_adminmenu');
 function wpsm_output_metabox() {
 	global $wpsm, $post, $count;
 	$count = 0;
-	
+
 	$dat = $wpsm->get(array('post_id' => $post->ID));
-	if (empty($dat)) $dat = array('nodata');	
+	if (empty($dat)) $dat = array('nodata');
 ?>
 
 <script type="text/javascript">
@@ -439,42 +466,43 @@ function wpsm_output_metabox() {
 	var count = 0;
 	var alcount = 0;
 	var wpsm = "wpsm_daybox";
-	var wpsmaf = ".wpsm_daybox0";	
+	var wpsmaf = ".wpsm_daybox0";
 	count = $(".box").length - 1;
 	alcount = count;
 	if (count > 0) {
 		$(".wpsm_minus").css("display","inline");
 	}
-	
+
 	var basehtml = $('.wpsm_daybox0').html();
 	$('body').after('<div class="' + wpsm + ' box" id="wpsm_tmpbox">' + basehtml + '</div>');
 	$('#wpsm_tmpbox').hide().find('input').attr({'name':''});
-	
+
 	var html = $('#wpsm_tmpbox').html();
-	
+
 	$('.wpsm_plus').live('click', function() {
 			console.log('count:' + count);
 			wpsmaf=".wpsm_daybox" + count;
-			
+
 			count++;
 			alcount++;
 			wpsm=wpsm+count;
-			
+
 			var wpsmadd='<div class="' + wpsm + ' box">' + html + '</div>';
-			
+
 			//console.log(wpsmaf);
 			$(wpsmaf).after(wpsmadd);
 			//$("."+wpsm).append(html);
-			
+
 			wpsm_day				= "wpsm_day[" + count + "]";
 			wpsm_time			= "wpsm_time[" + count + "]";
 			wpsm_status			= "wpsm_status[" + count + "]";
 			wpsm_class			= "wpsm_class"+count;
 			wpsm_URL				= "wpsm_url[" + count + "]";
-			
+			wpsm_ticket			= "wpsm_ticket[" + count + "]";
+
 			var obj = $("."+wpsm);
 			var parent = $(this).parent().parent();
-			
+
 			obj.find("input.sc-data").attr({name:wpsm_day,value:"", id:wpsm_class, class:""});
 			obj.find("textarea.sc-time").attr({name:wpsm_time,value:""});
 			obj.find("input.sc-status").each(function() {
@@ -483,15 +511,20 @@ function wpsm_output_metabox() {
 				$(this).attr(opt);
 			});
 			obj.find("input.sc-url").attr({name:wpsm_URL,value:""});
-			
+			obj.find("input.sc-ticket").each(function() {
+				var opt = {name:wpsm_ticket,value:$(this).val()};
+				//if ($(this).attr('checked') == 'checked') opt.checked = 'checked';
+				$(this).attr(opt);
+			});
+
 			$(".wpsm_minus").css("display","block");
-						
+
 			$("#"+wpsm_class).datepicker({ dateFormat: 'yy-mm-dd' });
 			wpsmaf = wpsm;
 			wpsm = "wpsm_daybox";
 		});
 		$('.wpsm_minus').live('click', function() {
-			$(this).parent().parent().empty();				
+			$(this).parent().parent().empty();
 			alcount--;
 			if (1 > alcount) {
 				$(".wpsm_minus").css("display","none");
@@ -520,6 +553,8 @@ function wpsm_output_metabox() {
 		<label>予約を受け付けない</label>
 		<input type="radio" name="wpsm_status[<?php echo $c?>]" value="1"<?php if(isset($d->status) && $d->status == 1):?> checked="checked"<?php endif;?> class="sc-status" />
 		<label>メールフォームで予約を受け付ける</label>
+		<input type="radio" name="wpsm_status[<?php echo $c?>]" value="4"<?php if(isset($d->status) && $d->status == 4):?> checked="checked"<?php endif;?> class="sc-status" />
+		<label>別サイトで購入を受け付ける</label>
 		<input type="radio" name="wpsm_status[<?php echo $c?>]" value="2"<?php if(isset($d->status) && $d->status == 2):?> checked="checked"<?php endif;?> class="sc-status" />
 		<label>別サイトで予約を受け付ける</label>
 		<input type="radio" name="wpsm_status[<?php echo $c?>]" value="3"<?php if(isset($d->status) && $d->status == 3):?> checked="checked"<?php endif;?> class="sc-status" />
@@ -528,6 +563,16 @@ function wpsm_output_metabox() {
 	<p class="wpsm_box_url">
 		<label>URL</label>
 		<input type="text" name="wpsm_url[<?php echo $c?>]" size="38" tabindex="1" class="sc-url" autocomplete="off"<?php if(isset($d->url)):?> value="<?php echo $d->url?>"<?php endif;?> />
+	</p>
+	<p class="wpsm_box_status">
+		<input type="radio" name="wpsm_ticket[<?php echo $c?>]" value="0"<?php if((isset($d->ticket) && $d->ticket == 0) || !isset($d->ticket)):?> checked="checked"<?php endif;?> class="sc-ticket" />
+		<label>当日券あり</label>
+		<input type="radio" name="wpsm_ticket[<?php echo $c?>]" value="1"<?php if(isset($d->ticket) && $d->ticket == 1):?> checked="checked"<?php endif;?> class="sc-ticket" />
+		<label>当日券なし</label>
+		<input type="radio" name="wpsm_ticket[<?php echo $c?>]" value="2"<?php if(isset($d->ticket) && $d->ticket == 2):?> checked="checked"<?php endif;?> class="sc-ticket" />
+		<label>満席</label>
+		<input type="radio" name="wpsm_ticket[<?php echo $c?>]" value="3"<?php if(isset($d->ticket) && $d->ticket == 3):?> checked="checked"<?php endif;?> class="sc-ticket" />
+		<label>表示しない</label>
 	</p>
 	<p><a class="wpsm_plus">+ 日付を追加</a></p>
 	<p><a class="wpsm_maenas wpsm_minus">日付を削除</a></p>
